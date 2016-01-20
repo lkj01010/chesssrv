@@ -1,31 +1,25 @@
 package main
 
 import (
-	"log"
-	"os"
 	"fmt"
+	"net/http"
+"golang.org/x/net/websocket"
+	"strconv"
+	"tiger/fw"
 )
 
+func serve(ws *websocket.Conn){
+	connCnt ++
+	fmt.Printf("agent come, access cnt=%s\n", strconv.Itoa(connCnt))
+
+	rw := &fw.WsReadWriter{ws: ws}
+	var msg string
+	rw.Read(&msg)
+}
+var (
+	connCnt = 0
+)
 func main() {
-	file, err := os.Create("test.log")
-	if err != nil {
-		log.Fatalln("fail to create test.log file!")
-	}
-	logger := log.New(file, "[debug]", log.LstdFlags|log.Lshortfile)
-	log.Println("1.Println log with log.LstdFlags ...")
-	logger.Println("1.Println log with log.LstdFlags ...")
-
-	a := [10]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}
-	sa := a[2:7]
-	fmt.Println(sa)
-	sa = append(sa, 100)
-	sb := sa[3:8]
-	sb[0] = 99
-	fmt.Println(a)  //输出：[1 2 3 4 5 99 7 100 9 0]
-	fmt.Println(sa) //输出：[3 4 5 99 7 100]
-	fmt.Println(sb) //输出：[99 7 100 9 0]
-
-
 	//	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 	//		s := http.Server{Handler: websocket.Handler(wsHandler)}
 	//		s.ServeHTTP(w, req)
@@ -36,5 +30,6 @@ func main() {
 	//		panic("Error: " + err.Error())
 	//	}
 
-
+	http.Handle("/", websocket.Handler(serve))
+	http.ListenAndServe(":8000", nil)
 }
