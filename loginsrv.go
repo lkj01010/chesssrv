@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
-"golang.org/x/net/websocket"
+	"golang.org/x/net/websocket"
 	"strconv"
-	"tiger/fw"
+	"chess/fw"
+	"fmt"
 )
 
-func serve(ws *websocket.Conn){
+func serve(ws *websocket.Conn) {
 	connCnt ++
 	fmt.Printf("agent come, access cnt=%s\n", strconv.Itoa(connCnt))
 
@@ -23,7 +23,7 @@ func main() {
 	//	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 	//		s := http.Server{Handler: websocket.Handler(wsHandler)}
 	//		s.ServeHTTP(w, req)
-	//	})
+	//	}r
 	//
 	//	err := http.ListenAndServe(":"+strconv.Itoa(Config.Port), nil)
 	//	if err != nil {
