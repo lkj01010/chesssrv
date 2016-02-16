@@ -2,8 +2,9 @@ package cfg
 
 var RedisDBs = map[string]int{
 	"cfg" : 0,
-	"game": 1,
-	"bill": 2,
+	"platform": 1,
+	"game": 2,
+	"bill": 3,
 }
 
 var SrvType = "dev"
@@ -13,7 +14,7 @@ var IPs = map[string]string{
 	"dev": "42.62.101.24",
 }
 
-var (
+const (
 	RedisPort = "6379"
 	AgentPort = "13001"
 	LobbyPort = "13002"

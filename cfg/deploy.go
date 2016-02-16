@@ -19,8 +19,11 @@ func FlushCfgToDB() {
 	defer c.Close()
 
 	c.Do("SELECT", RedisDBs["cfg"])
-	c.Do("set", "AgentPort", AgentPort)
-	c.Do("set", "LobbyPort", AgentPort)
-	c.Do("set", "GamePort", AgentPort)
-	c.Do("set", "DataPort", AgentPort)
+	c.Do("FLUSHALL")
+	c.Do("SET", "srv:port:agent", AgentPort)
+	c.Do("SET", "srv:port:lobby", LobbyPort)
+	c.Do("SET", "srv:port:game", GamePort)
+	c.Do("SET", "srv:port:data", DataPort)
+
+	fmt.Println("FlushCfgToDB")
 }
