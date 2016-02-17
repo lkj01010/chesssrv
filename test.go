@@ -64,6 +64,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("%#v\n", j2)
+//	jj2 := (j2["obj"].(map[string]interface{}))["p2"]
 	jj2 := (j2["obj"].(map[string]interface{}))["p2"]
 	fmt.Println(jj2)
 	//	fmt.Printf("%s\n", j2)

@@ -14,3 +14,7 @@ func NewAgent(rw ReadWriter) (a *Agent) {
 	fw.Log.Info("login:NewAgent")
 	return &Agent{rw}
 }
+
+func (a *Agent)Handle(msg string) {
+
+}
