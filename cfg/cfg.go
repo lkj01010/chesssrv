@@ -2,7 +2,7 @@ package cfg
 
 var RedisDBs = map[string]int{
 	"cfg" : 0,
-	"platform": 1,
+	"global": 1,
 	"game": 2,
 	"bill": 3,
 }

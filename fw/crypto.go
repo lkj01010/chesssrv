@@ -4,8 +4,9 @@ import (
 	"math/big"
 )
 
-func Rand(max int) (ret int) {
+func Rand(max int64) (ret int64) {
 	m := big.NewInt(max)
-	ret, _ = rand.Int(rand.Reader, m)
+	bigInt, _ := rand.Int(rand.Reader, m)
+	ret = bigInt.Int64()
 	return
 }

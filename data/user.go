@@ -12,7 +12,7 @@ type User struct {
 	c redis.Conn
 }
 
-func(u *User)prepare()(b bool, err error){
+func(u *User)Init()(err error){
 	//setup connection
 	u.c, err = redis.Dial("tcp", cfg.RedisAddr(),
 		redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
@@ -21,31 +21,56 @@ func(u *User)prepare()(b bool, err error){
 		return
 	}
 
+	//select db
+	_, err = u.c.Do("SELECT", cfg.RedisDBs["global"])
+	if err != nil {
+		fw.Log.Error("select err")
+	}
+
 	//fill keys
-	b, _ = u.c.Do("EXIST", "account:count")
-	if b == false {
-		u.c.Do("SET", "account:count", 0)
+	b, _ := u.c.Do("EXISTS", "account:count")
+	fw.Log.WithFields(logrus.Fields{
+		"b": b,
+	}).Info("")
+	if b != 1 {
+		b, err = u.c.Do("SET", "account:count", 3)
+		fw.Log.WithFields(logrus.Fields{
+			"b": b,
+		}).Info("set ok?")
+		if err != nil {
+			fw.Log.Error(err.Error())
+		}
 	}
 	return
 }
 
+func (u *User)Exit(){
+	u.c.Close()
+}
+
 func(u *User)HandleRegister(account, psw string)(code int, err error){
-	fw.Log.WithFields(logrus.Fields{
-		"account": account,
-		"psw":  psw,
-	}).Info("HandleRegister")
 	accountkey := "account:account:" + account
-	exist, _ := u.c.Do("EXIST", accountkey)
-	if exist == false {
-		u.c.Do("INCR", "account:count")
+	fw.Log.WithField("accountkey", accountkey).Debug("")
+	exist, _ := u.c.Do("EXISTS", accountkey)
+	if exist == "0" {
+		_, err = u.c.Do("INCR", "account:count")
+		if err != nil{
+			fw.Log.Error(err.Error())
+		}
 		id, _:= u.c.Do("GET", "account:count")
 		u.c.Do("HSET", accountkey, "id", id)
 		u.c.Do("HSET", accountkey, "psw", psw)
 		code = com.E_Success
+		fw.Log.Debug("Register success")
 	}else{
 		code = com.E_LoginAccountExist
 		fw.Log.Warn("E_LoginAccountExist")
 	}
+	fw.Log.WithFields(logrus.Fields{
+		"account": account,
+		"psw":  psw,
+		"exist": exist,
+	}).Info("HandleRegister")
 	return
 }
 
@@ -55,11 +80,12 @@ func(u *User)HandleAuth(game *Game, account, psw string)(code int, loginkey stri
 		"psw":  psw,
 	}).Info("HandleLogin")
 	accountkey := "account:account:" + account
-	exist, _ := u.c.Do("EXIST", accountkey)
-	if exist == false {
+	exist, _ := u.c.Do("EXISTS", accountkey)
+	if exist == 0 {
 		code = com.E_LoginAccountNotExist
 	}else{
-		id, _:= u.c.Do("HGET", accountkey, "id")
+		_id, _:= u.c.Do("HGET", accountkey, "id")
+		id := _id.(string)
 		pswvalue, _ := u.c.Do("HGET", accountkey, "psw")
 		if pswvalue == psw {
 			loginkey = game.GenLoginKey(id)
