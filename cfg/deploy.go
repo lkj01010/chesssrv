@@ -5,11 +5,6 @@ import (
 	"time"
 )
 
-func RedisAddr() (string) {
-	addr := IPs[SrvType] + ":" + RedisPort
-	return addr
-}
-
 func FlushCfgToDB() {
 	c, err := redis.Dial("tcp", RedisAddr(), redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
 	if err != nil {

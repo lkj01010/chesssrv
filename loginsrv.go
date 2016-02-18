@@ -19,6 +19,10 @@ func serve(ws *websocket.Conn) {
 var (
 	connCnt = 0
 )
+func prepareRedis(){
+	//todo
+//	data.User
+}
 func main() {
 	//	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 	//		s := http.Server{Handler: websocket.Handler(wsHandler)}

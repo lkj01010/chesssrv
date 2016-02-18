@@ -11,7 +11,7 @@ func main() {
 	fw.Log.Info("Started observing beach")
 	fw.Log.WithFields(logrus.Fields{
 		"omg":    true,
-//		"err":    err,
+		//		"err":    err,
 		"number": 100,
 	}).Warn("The ice breaks!")
 }

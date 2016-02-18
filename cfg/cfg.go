@@ -21,3 +21,8 @@ const (
 	GamePort = "13003"
 	DataPort = "13004"
 )
+
+func RedisAddr() (string) {
+	addr := IPs[SrvType] + ":" + RedisPort
+	return addr
+}
