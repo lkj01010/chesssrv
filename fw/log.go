@@ -2,6 +2,7 @@ package fw
 
 import (
 	"github.com/Sirupsen/logrus"
+	"fmt"
 )
 
 var Log = logrus.New()
@@ -17,5 +18,13 @@ func init() {
 	//		log.Fatalln("fail to create test.log file!")
 	//	}
 	//	log.Out = file
+}
+
+func PrintType(v interface{}, args...interface{}){
+	if len(args) > 0 {
+		fmt.Printf("Type of %s is %T\n", args[0], v)
+	}else{
+		fmt.Printf("Value type is %T\n", v)
+	}
 }
 
