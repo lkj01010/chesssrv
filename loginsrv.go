@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"chess/fw"
 	"fmt"
+	"chess/data"
+	"chess/login"
 )
 //func
 
@@ -12,18 +14,27 @@ func serve(ws *websocket.Conn) {
 	connCnt ++
 	fmt.Printf("agent come, access cnt=%s\n", strconv.Itoa(connCnt))
 
-	rw := &fw.WsReadWriter{ws: ws}
-	var msg string
-	rw.Read(&msg)
+	agent := fw.NewIpcAgent(&login.LoginServer{}, fw.NewWsReadWriter(ws))
+	agent.Serve()
 }
 var (
 	connCnt = 0
+	dUser *data.User
 )
-func prepareRedis(){
-	//todo
-//	data.User
+func onInit() {
+	dUser = new(data.User)
+	dUser.Init()
 }
+
+func onExit() {
+	dUser.Exit()
+}
+
 func main() {
+	onInit()
+	defer func() {
+		onExit()
+	}()
 	//	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 	//		s := http.Server{Handler: websocket.Handler(wsHandler)}
 	//		s.ServeHTTP(w, req)

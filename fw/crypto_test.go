@@ -1,18 +1,26 @@
 package fw
-import "testing"
+import (
+	"testing"
+)
 
 //go test -v -bench=".*"
 //go test -bench=".*" -cpuprofile=cpu.prof -c
 
-func BenchmarkCryptoRand(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Rand(1000)
-	}
-}
+//func BenchmarkCryptoRand(b *testing.B) {
+//	for i := 0; i < b.N; i++ {
+//		Rand(1000)
+//	}
+//}
 
 func BenchmarkFastRand(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		FastRand()
+	}
+}
+
+func BenchmarkRandlibRand(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Randn(1000000)
 	}
 }
 
