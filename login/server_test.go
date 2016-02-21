@@ -71,7 +71,7 @@ func TestServer(t *testing.T) {
 		return
 	}
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		msg := []byte("hello, world")
 		fw.PrintType(msg, "msg")
 		msg = append(msg, byte(i))
