@@ -92,3 +92,8 @@ func TestServer(t *testing.T) {
 
 	conn.Close()
 }
+
+func TestServer2(t *testing.T){
+	once.Do(startServer)
+
+}

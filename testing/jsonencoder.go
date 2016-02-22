@@ -32,7 +32,6 @@ func Test1() {
 	fmt.Printf("\nag is %+v \n", ag)
 }
 
-
 func Test2() {
 	type stru2 struct {
 		InputIndex int `json:"input_index"`
