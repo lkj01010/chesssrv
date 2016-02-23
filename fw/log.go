@@ -28,3 +28,5 @@ func PrintType(v interface{}, args...interface{}){
 	}
 }
 
+//todo
+func LogInfo()

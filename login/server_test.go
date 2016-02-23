@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"chess/fw"
-	"chess/data"
+	"chess/dao"
 	"net/http"
 	"net"
 	"bytes"
@@ -22,10 +22,10 @@ func serve(ws *websocket.Conn) {
 }
 var (
 	connCnt = 0
-	dUser *data.User
+	dUser *dao.User
 )
 func onInit() {
-	dUser = new(data.User)
+	dUser = new(dao.User)
 	dUser.Init()
 }
 
