@@ -5,6 +5,7 @@ import (
 	"time"
 	"chess/cfg"
 	"strconv"
+	log "github.com/lkj01010/log"
 )
 
 const (
@@ -15,33 +16,33 @@ type Game struct {
 	c redis.Conn
 }
 
-var game *Game
+var GameInst *Game
 
 func init() {
 	//setup connection
-	game = new(Game)
+	GameInst = new(Game)
 	var err error
-	game.c, err = redis.Dial("tcp", cfg.RedisAddr(),
+	GameInst.c, err = redis.Dial("tcp", cfg.RedisAddr(),
 		redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
 	if err != nil {
-		fw.Log.Error("data:game redis.Dial error")
+		log.Error("data:game redis.Dial error")
 		return
 	}
 
 	//select db
-	_, err = game.c.Do("SELECT", cfg.RedisDBs[cfg.Game])
+	_, err = GameInst.c.Do("SELECT", cfg.RedisDBs[cfg.Game])
 	if err != nil {
-		fw.Log.Error("select err")
+		log.Error(err.Error())
 	}
 	return
 }
 
 func (g *Game)exit() {
-	game.c.Close()
+	GameInst.c.Close()
 }
 
 func (g *Game)genLoginKey(id string) (key string) {
-	fw.Log.Info("game:genLoginKey")
+	log.Info("game:genLoginKey")
 	key = strconv.Itoa(fw.FastRand())
 	g.c.Do("HSET", LoginkeyKey, id, key)
 	return

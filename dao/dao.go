@@ -1,6 +1,6 @@
 package dao
 
 func Exit(){
-	game.exit()
+	GameInst.exit()
 	UserInst.exit()
 }

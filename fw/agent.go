@@ -1,4 +1,7 @@
 package fw
+import (
+	log "github.com/lkj01010/log"
+)
 
 type ReadWriter interface {
 	Read(msg *string) (err error)
@@ -39,6 +42,6 @@ func (a *IpcAgent)Serve() (err error) {
 	return
 
 	Error:
-	Log.Error("[agent:Server]" + err.Error())
+	log.Error("[agent:Server]" + err.Error())
 	return
 }

@@ -2,10 +2,10 @@ package dao
 import (
 	"github.com/garyburd/redigo/redis"
 	"chess/fw"
-	"github.com/Sirupsen/logrus"
 	"chess/com"
 	"chess/cfg"
 	"time"
+	"github.com/lkj01010/log"
 )
 
 const (
@@ -28,7 +28,7 @@ func init() {
 	UserInst.c, err = redis.Dial("tcp", cfg.RedisAddr(),
 		redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
 	if err != nil {
-		fw.Log.Error("[user:Init] redis.Dial error")
+		log.Error("[user:Init] redis.Dial error")
 		return
 	}
 
@@ -37,25 +37,23 @@ func init() {
 	if err != nil {
 		return
 	}
-	fw.Log.WithField("s", s).Error("select")
+	log.Error("select")
 	fw.PrintType(s, "s")
 
 	//fill keys
 	b, _ := redis.Bool(UserInst.c.Do("EXISTS", AccountCountKey))
-	fw.Log.WithFields(logrus.Fields{
-		"b": b,
-	}).Info("fill key account")
+	log.Info("fill key account")
 	//	switch b.(type) {
 	//	case interface{}:
-	//		fw.Log.Debug("interface")
+	//		log..Debug("interface")
 	//	case []byte:
-	//		fw.Log.Debug("byte")
+	//		log..Debug("byte")
 	//	case string:
-	//		fw.Log.Debug("string")
+	//		log..Debug("string")
 	//	case *int:
-	//		fw.Log.Debug("int")
+	//		log..Debug("int")
 	//	default:
-	//		fw.Log.Debug("other")
+	//		log..Debug("other")
 	//	}
 
 	if b == false {
@@ -74,7 +72,6 @@ type RegisterArgs struct {
 
 func (u *User)HandleRegister(args *RegisterArgs, reply *fw.RpcReply) error {
 	accountkey := AccountAccountPre + args.Account
-	fw.Log.WithField("accountkey", accountkey).Debug("")
 	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
 	if !exists {
 		u.c.Do("INCR", AccountCountKey)
@@ -82,16 +79,12 @@ func (u *User)HandleRegister(args *RegisterArgs, reply *fw.RpcReply) error {
 		u.c.Do("HSET", accountkey, IdKey, id)
 		u.c.Do("HSET", accountkey, PswKey, args.Psw)
 		reply.Code = com.E_Success
-		fw.Log.Debug("Register success")
+		log.Debug("Register success")
 	}else {
 		reply.Code = com.E_LoginAccountExist
-		fw.Log.Debug("E_LoginAccountExist")
+		log.Debug("E_LoginAccountExist")
 	}
-	fw.Log.WithFields(logrus.Fields{
-		"account": args.Account,
-		"psw":  args.Psw,
-		"exist": exists,
-	}).Info("[user:HandleRegister]")
+
 	return nil
 }
 
@@ -100,30 +93,26 @@ type AuthArgs struct {
 }
 
 type AuthReply struct {
-	Code int
+	Code     int
 	LoginKey string
 }
 
 func (u *User)HandleAuth(args *AuthArgs, reply *AuthReply) (err error) {
-	fw.Log.WithFields(logrus.Fields{
-		"account": args.Account,
-		"psw":  args.Psw,
-	}).Debug("[user:HandleAuth]")
 	accountkey := AccountAccountPre + args.Account
 	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
 	if exists == false {
 		reply.Code = com.E_LoginAccountNotExist
-		fw.Log.Debug("[user:HandleAuth]E_LoginAccountNotExist")
+		log.Debug("[user:HandleAuth]E_LoginAccountNotExist")
 	}else {
 		id, _ := redis.String(u.c.Do("HGET", accountkey, IdKey))
 		//		fw.PrintType(id, "id")
 		pswvalue, _ := redis.String(u.c.Do("HGET", accountkey, PswKey))
 		if pswvalue == args.Psw {
-			reply.LoginKey = game.genLoginKey(id)
+			reply.LoginKey = GameInst.genLoginKey(id)
 			reply.Code = com.E_Success
 		}else {
 			reply.Code = com.E_LoginPasswordIncorrect
-			fw.Log.Warn("E_LoginPasswordIncorrect")
+			log.Warning("E_LoginPasswordIncorrect")
 		}
 	}
 	return
