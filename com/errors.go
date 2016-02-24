@@ -3,6 +3,7 @@ package com
 const (
 	E_Success = 0
 	E_Fail = 1
+	E_Unknown = 2
 )
 
 const (

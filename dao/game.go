@@ -1,4 +1,4 @@
-package data
+package dao
 import (
 	"github.com/garyburd/redigo/redis"
 	"chess/fw"
@@ -15,9 +15,12 @@ type Game struct {
 	c redis.Conn
 }
 
-func (this *Game)Init() (b bool, err error) {
+var game *Game
+
+func init() (b bool, err error) {
 	//setup connection
-	this.c, err = redis.Dial("tcp", cfg.RedisAddr(),
+	game = new(Game)
+	game.c, err = redis.Dial("tcp", cfg.RedisAddr(),
 		redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
 	if err != nil {
 		fw.Log.Error("data:game redis.Dial error")
@@ -25,22 +28,20 @@ func (this *Game)Init() (b bool, err error) {
 	}
 
 	//select db
-	_, err = this.c.Do("SELECT", cfg.RedisDBs["game"])
+	_, err = game.c.Do("SELECT", cfg.RedisDBs[cfg.Game])
 	if err != nil {
 		fw.Log.Error("select err")
 	}
 	return
 }
 
-func (this *Game)Exit() {
-	this.c.Close()
+func (g *Game)exit() {
+	game.c.Close()
 }
 
-func (this *Game)GenLoginKey(id string) (key string) {
-	fw.Log.Info("GenLoginKey")
-//	rand := fw.Rand(1000)
-//	key = strconv.FormatInt(rand, 10)
+func (g *Game)genLoginKey(id string) (key string) {
+	fw.Log.Info("game:genLoginKey")
 	key = strconv.Itoa(fw.FastRand())
-	this.c.Do("HSET", LoginkeyKey, id, key)
+	g.c.Do("HSET", LoginkeyKey, id, key)
 	return
 }

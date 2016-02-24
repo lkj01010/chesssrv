@@ -1,10 +1,17 @@
 package cfg
 
+const (
+	Cfg = "cfg"
+	Pf = "pf"
+	Game = "game"
+	Bill = "bill"
+)
+
 var RedisDBs = map[string]int{
-	"cfg" : 0,
-	"global": 1,
-	"game": 2,
-	"bill": 3,
+	Cfg : 0,
+	Pf: 1,
+	Game: 2,
+	Bill: 3,
 }
 
 var SrvType = "dev"
