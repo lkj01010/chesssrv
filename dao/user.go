@@ -8,16 +8,24 @@ import (
 	"time"
 )
 
+const (
+	AccountAccountPre = "account:account:"
+	AccountCountKey = "account:count"
+	IdKey = "id"
+	PswKey = "psw"
+)
+
 type User struct {
 	c redis.Conn
 }
 
-var user *User
+var UserInst *User
 
-func init() (err error) {
+func init() {
 	//setup connection
-	user = new(User)
-	user.c, err = redis.Dial("tcp", cfg.RedisAddr(),
+	UserInst = new(User)
+	var err error
+	UserInst.c, err = redis.Dial("tcp", cfg.RedisAddr(),
 		redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
 	if err != nil {
 		fw.Log.Error("[user:Init] redis.Dial error")
@@ -25,15 +33,15 @@ func init() (err error) {
 	}
 
 	//select db
-	s, err := user.c.Do("SELECT", cfg.RedisDBs[cfg.Pf])
+	s, err := UserInst.c.Do("SELECT", cfg.RedisDBs[cfg.Pf])
 	if err != nil {
-		return err
+		return
 	}
 	fw.Log.WithField("s", s).Error("select")
 	fw.PrintType(s, "s")
 
 	//fill keys
-	b, _ := redis.Bool(user.c.Do("EXISTS", "account:count"))
+	b, _ := redis.Bool(UserInst.c.Do("EXISTS", AccountCountKey))
 	fw.Log.WithFields(logrus.Fields{
 		"b": b,
 	}).Info("fill key account")
@@ -51,7 +59,7 @@ func init() (err error) {
 	//	}
 
 	if b == false {
-		user.c.Do("SET", "account:count", 0)
+		UserInst.c.Do("SET", AccountCountKey, 0)
 	}
 	return
 }
@@ -60,18 +68,11 @@ func (u *User)exit() {
 	u.c.Close()
 }
 
-const (
-	AccountAccountPre = "account:account:"
-	AccountCountKey = "account:count"
-	IdKey = "id"
-	PswKey = "psw"
-)
-
 type RegisterArgs struct {
 	Account, Psw string
 }
 
-func (u *User)HandleRegister(args *RegisterArgs, code *int) error {
+func (u *User)HandleRegister(args *RegisterArgs, reply *fw.RpcReply) error {
 	accountkey := AccountAccountPre + args.Account
 	fw.Log.WithField("accountkey", accountkey).Debug("")
 	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
@@ -80,10 +81,10 @@ func (u *User)HandleRegister(args *RegisterArgs, code *int) error {
 		id, _ := u.c.Do("GET", AccountCountKey)
 		u.c.Do("HSET", accountkey, IdKey, id)
 		u.c.Do("HSET", accountkey, PswKey, args.Psw)
-		code = com.E_Success
+		reply.Code = com.E_Success
 		fw.Log.Debug("Register success")
 	}else {
-		code = com.E_LoginAccountExist
+		reply.Code = com.E_LoginAccountExist
 		fw.Log.Debug("E_LoginAccountExist")
 	}
 	fw.Log.WithFields(logrus.Fields{

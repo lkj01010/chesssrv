@@ -17,9 +17,10 @@ type Game struct {
 
 var game *Game
 
-func init() (b bool, err error) {
+func init() {
 	//setup connection
 	game = new(Game)
+	var err error
 	game.c, err = redis.Dial("tcp", cfg.RedisAddr(),
 		redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
 	if err != nil {

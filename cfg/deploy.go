@@ -18,7 +18,7 @@ func FlushCfgToDB() {
 	c.Do("SET", "srv:port:agent", AgentPort)
 	c.Do("SET", "srv:port:lobby", LobbyPort)
 	c.Do("SET", "srv:port:game", GamePort)
-	c.Do("SET", "srv:port:data", DataPort)
+	c.Do("SET", "srv:port:data", DaoPort)
 
 	fmt.Println("FlushCfgToDB")
 }

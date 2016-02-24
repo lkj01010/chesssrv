@@ -26,7 +26,7 @@ const (
 	AgentPort = "13001"
 	LobbyPort = "13002"
 	GamePort = "13003"
-	DataPort = "13004"
+	DaoPort = "13004"
 )
 
 func RedisAddr() (string) {
