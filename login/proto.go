@@ -12,28 +12,28 @@ import (
  */
 
 const (
-	methodRegisterReq = 100
-	methodRegisterResp = 101
+	cmdRegisterReq = 100
+	cmdRegisterResp = 101
 
-	methodLoginReq = 102
-	methodLoginResp = 103
+	cmdLoginReq = 102
+	cmdLoginResp = 103
 
-	methodToLobbyReq = 200
-	methodToLobbyResp = 201
+	cmdToLobbyReq = 200
+	cmdToLobbyResp = 201
 
-	methodToGameReq = 202
-	methodToGameResp = 203
+	cmdToGameReq = 202
+	cmdToGameResp = 203
 )
 
-const methodText = &map[int]string{
-	methodRegisterReq:    "registerReq",
-	methodRegisterResp:    "registerResp",
-	methodLoginReq:    "loginReq",
-	methodLoginResp:    "loginResp",
-	methodToLobbyReq:    "toLobbyReq",
-	methodToLobbyResp:    "toLobbyResp",
-	methodToGameReq:    "toGameReq",
-	methodToGameResp:    "toGameResp",
+var cmdText = &map[int]string{
+	cmdRegisterReq:    "registerReq",
+	cmdRegisterResp:    "registerResp",
+	cmdLoginReq:    "loginReq",
+	cmdLoginResp:    "loginResp",
+	cmdToLobbyReq:    "toLobbyReq",
+	cmdToLobbyResp:    "toLobbyResp",
+	cmdToGameReq:    "toGameReq",
+	cmdToGameResp:    "toGameResp",
 }
 
 //var loginMethodCodes map[string]int
@@ -70,10 +70,10 @@ type ToLobbyResp struct {
 	Msg	string `json:"msg"`
 }
 
-type ToGameReq struct {
+type ToRoomReq struct {
 	Msg string `json:"msg"`
 }
 
-type ToGameResp struct {
+type ToRoomResp struct {
 	Msg string `json:"msg"`
 }

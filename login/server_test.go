@@ -5,32 +5,29 @@ import (
 	"fmt"
 	"strconv"
 	"chess/fw"
-	"chess/dao"
 	"net/http"
 	"net"
 	"bytes"
 	"sync"
 	"net/http/httptest"
+"github.com/lkj01010/log"
 )
 
 func serve(ws *websocket.Conn) {
 	connCnt ++
 	fmt.Printf("agent come, access cnt=%s\n", strconv.Itoa(connCnt))
 
-	agent := fw.NewIpcAgent(&LoginServer{}, fw.NewWsReadWriter(ws))
+	agent := fw.NewAgent(&handler{}, fw.NewWsReadWriter(ws))
 	agent.Serve()
 }
 var (
 	connCnt = 0
-	dUser *dao.User
 )
 func onInit() {
-	dUser = new(dao.User)
-	dUser.Init()
+
 }
 
 func onExit() {
-	dUser.Exit()
 }
 
 func startServer() {
@@ -44,7 +41,7 @@ func startServer() {
 
 	server := httptest.NewServer(nil)
 	serverAddr = server.Listener.Addr().String()
-	fw.Log.Print("Test WebSocket server listening on ", serverAddr)
+	log.Info("Test WebSocket server listening on ", serverAddr)
 }
 
 var (

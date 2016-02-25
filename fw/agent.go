@@ -8,30 +8,32 @@ type ReadWriter interface {
 	Write(msg string) (err error)
 }
 
-type Agent interface {
+type Handler interface {
 	Handle(req string) (resp string, err error)
 }
 
-type IpcAgent struct {
-	Agent
+type Agent struct {
+	Handler
 	ReadWriter
 }
 
-func NewIpcAgent(agent Agent, rw ReadWriter) *IpcAgent {
-	return &IpcAgent{agent, rw}
+func NewAgent(h Handler, rw ReadWriter) *Agent {
+	return &Agent{h, rw}
 }
 
-func (a *IpcAgent)Serve() (err error) {
+func (a *Agent)Serve() (err error) {
+	var buf, resp string
 	for {
-		var buf string
 		err = a.Read(&buf)
 		if err != nil {
-			goto Error
+			log.Error("read error:", err.Error())
+			return
 		}
 		//		fmt.Println("id=" + ra.Id() + ", read=" + buf)
-		resp, err := a.Handle(buf)
+		resp, err = a.Handle(buf)
 		if err != nil {
-			goto Error
+			log.Error("handle error:", err.Error())
+			return
 		}
 		//		if resp != "" {
 		a.Write(resp)
@@ -39,9 +41,5 @@ func (a *IpcAgent)Serve() (err error) {
 		//			a.Write("recive ''")
 		//		}
 	}
-	return
-
-	Error:
-	log.Error("[agent:Server]" + err.Error())
 	return
 }

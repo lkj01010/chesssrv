@@ -14,20 +14,17 @@ func serve(ws *websocket.Conn) {
 	connCnt ++
 	fmt.Printf("agent come, access cnt=%s\n", strconv.Itoa(connCnt))
 
-	agent := fw.NewIpcAgent(&login.LoginServer{}, fw.NewWsReadWriter(ws))
+	agent := fw.NewAgent(&login.handler{}, fw.NewWsReadWriter(ws))
 	agent.Serve()
 }
 var (
 	connCnt = 0
-	dUser *dao.User
 )
 func onInit() {
-	dUser = new(dao.User)
-	dUser.Init()
 }
 
 func onExit() {
-	dUser.Exit()
+	dao.Exit()
 }
 
 func main() {
@@ -44,6 +41,7 @@ func main() {
 	//	if err != nil {
 	//		panic("Error: " + err.Error())
 	//	}
+	server := login.NewServer()
 
 	http.Handle("/", websocket.Handler(serve))
 	http.ListenAndServe(":8000", nil)
