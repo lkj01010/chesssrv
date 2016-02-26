@@ -21,6 +21,49 @@ type User struct {
 
 var UserInst *User
 
+func NewUser() *User {
+	u := new(User)
+	c, err := redis.Dial("tcp", cfg.RedisAddr(),
+		redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
+	if err != nil {
+		log.Error(err.Error())
+		return nil
+	}
+	u.c = c
+
+	//select db
+	s, err := c.Do("SELECT", cfg.RedisDBs[cfg.Pf])
+	if err != nil {
+		log.Error(err.Error())
+		return nil
+	}
+
+	//temp
+	fw.PrintType(s, "s")
+
+	//fill keys
+	b, _ := redis.Bool(c.Do("EXISTS", AccountCountKey))
+
+	//	switch b.(type) {
+	//	case interface{}:
+	//		log..Debug("interface")
+	//	case []byte:
+	//		log..Debug("byte")
+	//	case string:
+	//		log..Debug("string")
+	//	case *int:
+	//		log..Debug("int")
+	//	default:
+	//		log..Debug("other")
+	//	}
+
+	if b == false {
+		c.Do("SET", AccountCountKey, 0)
+		log.Info("fill key:", AccountCountKey)
+	}
+	return u
+}
+
 func init() {
 	//setup connection
 	UserInst = new(User)
@@ -66,11 +109,11 @@ func (u *User)exit() {
 	u.c.Close()
 }
 
-type RegisterArgs struct {
+type UserRegisterArgs struct {
 	Account, Psw string
 }
 
-func (u *User)HandleRegister(args *RegisterArgs, reply *fw.RpcReply) error {
+func (u *User)HandleRegister(args *UserRegisterArgs, reply *fw.RpcReply) error {
 	accountkey := AccountAccountPre + args.Account
 	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
 	if !exists {
@@ -88,16 +131,16 @@ func (u *User)HandleRegister(args *RegisterArgs, reply *fw.RpcReply) error {
 	return nil
 }
 
-type AuthArgs struct {
+type UserAuthArgs struct {
 	Account, Psw string
 }
 
-type AuthReply struct {
+type UserAuthReply struct {
 	Code     int
 	LoginKey string
 }
 
-func (u *User)HandleAuth(args *AuthArgs, reply *AuthReply) (err error) {
+func (u *User)HandleAuth(args *UserAuthArgs, reply *UserAuthReply) (err error) {
 	accountkey := AccountAccountPre + args.Account
 	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
 	if exists == false {

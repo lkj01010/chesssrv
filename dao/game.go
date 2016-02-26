@@ -18,6 +18,26 @@ type Game struct {
 
 var GameInst *Game
 
+func NewGame() *Game{
+	g := new(Game)
+	c, err := redis.Dial("tcp", cfg.RedisAddr(),
+		redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
+	if err != nil {
+		log.Error(err.Error())
+		return nil
+	}
+	g.c = c
+
+	//select db
+	_, err = c.Do("SELECT", cfg.RedisDBs[cfg.Game])
+	if err != nil {
+		log.Error(err.Error())
+		return nil
+	}
+
+	return g
+}
+
 func init() {
 	//setup connection
 	GameInst = new(Game)

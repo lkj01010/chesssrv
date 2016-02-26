@@ -1,5 +1,5 @@
 package fw
 
 type RpcReply struct {
-	Code int
+	Code int `json:"code"`
 }

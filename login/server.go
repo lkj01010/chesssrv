@@ -3,27 +3,42 @@ import (
 	"chess/dao"
 	"chess/fw"
 	"strconv"
+	log "github.com/lkj01010/log"
 )
 
-type server struct {
-	daocli *dao.Client
+type Server struct {
+	dc     *dao.Client
 	agents map[string]*fw.Agent
 }
 
-func NewServer() (*server, error) {
-	cli, err := dao.NewClient()
+func NewServer() *Server {
+	dc, err := dao.NewClient()
 	if err != nil {
-		return nil, err
+		log.Error(err.Error())
+		return nil
 	}
-	return &server{cli}, nil
+	return &Server{
+		dc: dc,
+		agents: make(map[string]*fw.Agent, 0),
+	}
 }
 
-func (s *server)serve(rw fw.ReadWriter) (err error) {
+func (s *Server)Close() {
+	if err := s.dc.Close(); err != nil {
+		log.Error(err.Error())
+	}
+}
+
+func (s *Server)AgentCount() int {
+	return len(s.agents)
+}
+
+func (s *Server)Serve(rw fw.ReadWriter) (err error) {
 	//todo: get id
 	id := strconv.Itoa(fw.FastRand())
 
 	var agent *fw.Agent
-	agent, err = fw.NewAgent(&handler{s.daocli}, fw.NewWsReadWriter(rw))
+	agent, err = fw.NewAgent(&handler{s.dc}, rw)
 	if err != nil {
 		return
 	}
@@ -33,5 +48,3 @@ func (s *server)serve(rw fw.ReadWriter) (err error) {
 	}
 	return
 }
-
-

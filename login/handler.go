@@ -21,6 +21,8 @@ func (h *handler)Handle(req string) (resp string, err error) {
 	switch msg.Cmd {
 	case cmdRegisterReq:
 		resp = h.handleRegister(msg.Content)
+	case cmdLoginReq:
+		resp = h.handleLogin(msg.Content)
 	}
 	return
 }
@@ -35,4 +37,19 @@ func (h *handler)handleRegister(content string) (resp string, err error){
 	if err = h.dc.UserRegister(req.Account, req.Psw, &reply); err != nil {
 		return
 	}
+	resp = com.MakeMsgString(cmdRegisterResp, reply)
+	return
+}
+
+func (h *handler)handleLogin(content string) (resp string, err error){
+	var req LoginReq
+	if err = json.Unmarshal([]byte(content), &req); err != nil {
+		return
+	}
+	var reply LoginResp
+	if err = h.dc.UserAuth(req.Account, req.Psw, &reply); err != nil {
+		return
+	}
+	resp = com.MakeMsgString(cmdLoginResp, reply)
+	return
 }

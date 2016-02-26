@@ -15,10 +15,10 @@ func testLogin(t *testing.T) {
 
 	//
 	var registerReply fw.RpcReply
-	UserInst.HandleRegister(&RegisterArgs{Account:"lkj2", Psw:"lkjpassword"}, &registerReply)
+	UserInst.HandleRegister(&UserRegisterArgs{Account:"lkj2", Psw:"lkjpassword"}, &registerReply)
 
-	var reply AuthReply
-	UserInst.HandleAuth(&AuthArgs{Account:"lkj2", Psw:"lkjpassword"}, &reply)
+	var reply UserAuthReply
+	UserInst.HandleAuth(&UserAuthArgs{Account:"lkj2", Psw:"lkjpassword"}, &reply)
 }
 
 func TestClient(t *testing.T) {
@@ -35,7 +35,7 @@ func TestClient(t *testing.T) {
 
 	// register
 	{
-		args := &RegisterArgs{"xxxaccount", "xxxpsw"}
+		args := &UserRegisterArgs{"xxxaccount", "xxxpsw"}
 		var reply fw.RpcReply
 		err = client.Call("User.HandleRegister", args, &reply)
 		if err != nil {
@@ -46,8 +46,8 @@ func TestClient(t *testing.T) {
 
 	// auth
 	{
-		args := &AuthArgs{"xxxaccount", "xxxpsw"}
-		var reply AuthReply
+		args := &UserAuthArgs{"xxxaccount", "xxxpsw"}
+		var reply UserAuthReply
 		if err = client.Call("User.HandleAuth", args, &reply); err != nil {
 			log.Error("HandleAuth", err)
 		}
