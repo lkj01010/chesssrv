@@ -6,32 +6,42 @@ import (
 	"net/rpc"
 	"chess/cfg"
 	log "github.com/lkj01010/log"
+"net"
+	"sync"
 )
 
-func testLogin(t *testing.T) {
-	//	defer func(){
-	//		Exit()
-	//	}()
+var once sync.Once
 
-	//
-	var registerReply fw.RpcReply
-	UserInst.HandleRegister(&UserRegisterArgs{Account:"lkj2", Psw:"lkjpassword"}, &registerReply)
+func startServer(){
+	//register rpc
+	models := NewModels()
+	rpc.Register(models.User)
+	rpc.Register(models.Game)
+	defer func() {
+		models.Exit()
+	}()
 
-	var reply UserAuthReply
-	UserInst.HandleAuth(&UserAuthArgs{Account:"lkj2", Psw:"lkjpassword"}, &reply)
+	//network
+	serverAddr := "127.0.0.1:" + cfg.DaoPort
+	l, e := net.Listen("tcp", serverAddr) // any available address
+	if e != nil {
+		log.Fatalf("net.Listen tcp : %v", e)
+	}
+	log.Info("dao RPC server listening on ", serverAddr)
+	rpc.Accept(l)
 }
 
-func TestClient(t *testing.T) {
+func TestBareClient(t *testing.T) {
+	once.Do(func(){
+		go startServer()
+	})
+
 	client, err := rpc.Dial("tcp", "127.0.0.1:" + cfg.DaoPort)
 	if err != nil {
 		log.Error("dialing:", err)
 	}
 
-	//	log.SetFlags(log.LstdFlags|log.Lshortfile)
-	//	log.SetPrefix("[DEBU]")
-	//	log.Print("xxxx")
-
-	log.Info("xjxjxjxj")
+	log.Info("TestClient")
 
 	// register
 	{
@@ -53,5 +63,26 @@ func TestClient(t *testing.T) {
 		}
 		log.Infof("HandleAuth: %v %v -> %+v", args.Account, args.Psw, reply)
 	}
+}
 
+func TestDaoClient(t *testing.T){
+	once.Do(func(){go startServer()})
+
+	cli, err := NewClient()
+	log.Debug("tdc 1")
+	if err != nil {
+		log.Error("new client error: ", err.Error())
+	}
+	{
+		var reply fw.RpcReply
+		if err := cli.UserRegister("zhu001", "21882", &reply); err != nil{
+			log.Error(err.Error())
+		}
+	}
+	{
+		var reply UserAuthReply
+		if err := cli.UserAuth("zhu001", "21882", &reply); err != nil{
+			log.Error(err.Error())
+		}
+	}
 }

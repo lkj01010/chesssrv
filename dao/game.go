@@ -13,12 +13,10 @@ const (
 )
 
 type Game struct {
-	c redis.Conn
+	model
 }
 
-var GameInst *Game
-
-func NewGame() *Game{
+func NewGame(p *Models) *Game {
 	g := new(Game)
 	c, err := redis.Dial("tcp", cfg.RedisAddr(),
 		redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
@@ -35,35 +33,23 @@ func NewGame() *Game{
 		return nil
 	}
 
+	//register model
+	g.parent = p
+
 	return g
 }
 
-func init() {
-	//setup connection
-	GameInst = new(Game)
-	var err error
-	GameInst.c, err = redis.Dial("tcp", cfg.RedisAddr(),
-		redis.DialReadTimeout(1 * time.Second), redis.DialWriteTimeout(1 * time.Second))
-	if err != nil {
-		log.Error("data:game redis.Dial error")
-		return
-	}
-
-	//select db
-	_, err = GameInst.c.Do("SELECT", cfg.RedisDBs[cfg.Game])
-	if err != nil {
-		log.Error(err.Error())
-	}
-	return
-}
-
 func (g *Game)exit() {
-	GameInst.c.Close()
+	g.c.Close()
 }
 
 func (g *Game)genLoginKey(id string) (key string) {
-	log.Info("game:genLoginKey")
+	log.Infof("game:genLoginKey, g=%+v", g)
 	key = strconv.Itoa(fw.FastRand())
-	g.c.Do("HSET", LoginkeyKey, id, key)
+	log.Debugf("%+v, %+v", g, g.c)
+	_, err := g.c.Do("HSET", LoginkeyKey, id, key)
+	if err != nil {
+		log.Error(err.Error())
+	}
 	return
 }

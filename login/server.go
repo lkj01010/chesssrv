@@ -46,5 +46,6 @@ func (s *Server)Serve(rw fw.ReadWriter) (err error) {
 	if err = agent.Serve(); err != nil {
 		return
 	}
+	delete(s.agents, id)
 	return
 }

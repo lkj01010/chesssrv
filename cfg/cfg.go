@@ -14,11 +14,20 @@ var RedisDBs = map[string]int{
 	Bill: 3,
 }
 
-var SrvType = "dev"
+const (
+	rtLocal = "local"
+	rtDev = "dev"
+)
+var RemoteType = rtLocal
 
 var IPs = map[string]string{
-	"pro": "42.62.101.24",
-	"dev": "42.62.101.24",
+	rtDev : "42.62.101.24",
+	rtLocal:"127.0.0.1",
+}
+
+var RedisIPs = map[string]string{
+	rtDev : "42.62.101.24",
+	rtLocal: "42.62.101.24",
 }
 
 const (
@@ -30,6 +39,6 @@ const (
 )
 
 func RedisAddr() (string) {
-	addr := IPs[SrvType] + ":" + RedisPort
+	addr := RedisIPs[RemoteType] + ":" + RedisPort
 	return addr
 }

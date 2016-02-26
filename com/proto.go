@@ -9,6 +9,9 @@ type Msg struct {
 func MakeMsgString(cmd int, content interface{})(resp string){
 	var msg Msg
 	msg.Cmd = cmd
-	msg.Content = json.Marshal(content)
-	return json.Marshal(msg)
+
+	b, _ := json.Marshal(content)
+	msg.Content = string(b)
+	b, _ = json.Marshal(msg)
+	return string(b)
 }

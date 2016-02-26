@@ -8,13 +8,13 @@ import (
 )
 
 func main() {
-	defer func() {
-		dao.Exit()
-	}()
-
 	//register rpc
-	rpc.Register(dao.UserInst)
-	rpc.Register(dao.GameInst)
+	models := dao.NewModels()
+	rpc.Register(models.User)
+	rpc.Register(models.Game)
+	defer func() {
+		models.Exit()
+	}()
 
 	//network
 	serverAddr := "127.0.0.1:" + cfg.DaoPort
@@ -22,6 +22,6 @@ func main() {
 	if e != nil {
 		log.Fatalf("net.Listen tcp : %v", e)
 	}
-	log.Infof("dao RPC server listening on", serverAddr)
+	log.Info("dao RPC server listening on ", serverAddr)
 	rpc.Accept(l)
 }

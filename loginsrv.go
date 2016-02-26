@@ -7,30 +7,20 @@ import (
 	log "github.com/lkj01010/log"
 )
 
-func serve(ws *websocket.Conn) {
-	if err := server.Serve(fw.NewWsReadWriter(ws)); err != nil {
-		log.Error(err.Error())
-	}
-	log.Infof("new agent comes, agent count=%v", len(server.AgentCount()))
-}
 
-var server *login.Server
 
 func main() {
+	server := login.NewServer()
 	defer func() {
 		server.Close()
 	}()
 
-	//	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-	//		s := http.Server{Handler: websocket.Handler(wsHandler)}
-	//		s.ServeHTTP(w, req)
-	//	}
-	//
-	//	err := http.ListenAndServe(":"+strconv.Itoa(Config.Port), nil)
-	//	if err != nil {
-	//		panic("Error: " + err.Error())
-	//	}
-	server = login.NewServer()
+	serve := func(ws *websocket.Conn) {
+		if err := server.Serve(fw.NewWsReadWriter(ws)); err != nil {
+			log.Error(err.Error())
+		}
+		log.Infof("new agent comes, agent count=%v", len(server.AgentCount()))
+	}
 
 	http.Handle("/", websocket.Handler(serve))
 	http.ListenAndServe(":8000", nil)

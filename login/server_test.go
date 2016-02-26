@@ -3,7 +3,6 @@ import (
 	"testing"
 	"golang.org/x/net/websocket"
 	"fmt"
-	"strconv"
 	"chess/fw"
 	"net/http"
 	"net"
@@ -13,28 +12,15 @@ import (
 "github.com/lkj01010/log"
 )
 
-func serve(ws *websocket.Conn) {
-	connCnt ++
-	fmt.Printf("agent come, access cnt=%s\n", strconv.Itoa(connCnt))
-
-	agent := fw.NewAgent(&handler{}, fw.NewWsReadWriter(ws))
-	agent.Serve()
+func newClient(){
+	//todo
 }
-var (
-	connCnt = 0
-)
-func onInit() {
-
-}
-
-func onExit() {
-}
-
-func startServer() {
-	onInit()
-	defer func() {
-		onExit()
-	}()
+func startServer1() {
+	serve := func(ws *websocket.Conn) {
+		fmt.Printf("agent come")
+		agent := fw.NewAgent(&handler{}, fw.NewWsReadWriter(ws))
+		agent.Serve()
+	}
 
 	http.Handle("/login", websocket.Handler(serve))
 	//	http.ListenAndServe(":8000", nil)
@@ -42,6 +28,23 @@ func startServer() {
 	server := httptest.NewServer(nil)
 	serverAddr = server.Listener.Addr().String()
 	log.Info("Test WebSocket server listening on ", serverAddr)
+}
+
+func startServer2(){
+	server := NewServer()
+	defer func() {
+		server.Close()
+	}()
+
+	serve := func(ws *websocket.Conn) {
+		if err := server.Serve(fw.NewWsReadWriter(ws)); err != nil {
+			log.Error(err.Error())
+		}
+		log.Infof("new agent comes, agent count=%v", len(server.AgentCount()))
+	}
+
+	http.Handle("/", websocket.Handler(serve))
+	http.ListenAndServe(":8000", nil)
 }
 
 var (
@@ -54,8 +57,8 @@ func newConfig(t *testing.T, path string) *websocket.Config {
 	return config
 }
 
-func TestServer(t *testing.T) {
-	once.Do(startServer)
+func TestServer1(t *testing.T) {
+	once.Do(startServer1)
 
 	// websocket.Dial()
 	client, err := net.Dial("tcp", serverAddr)
@@ -91,6 +94,6 @@ func TestServer(t *testing.T) {
 }
 
 func TestServer2(t *testing.T){
-	once.Do(startServer)
+	once.Do(startServer2)
 
 }

@@ -2,15 +2,18 @@ package dao
 import (
 	"net/rpc"
 	"chess/cfg"
+	log "github.com/lkj01010/log"
 )
 
 type Client struct {
 	cli *rpc.Client
 }
 
-func NewClient() (cli *Client, err error) {
+func NewClient() (c *Client, err error) {
 	var cli *rpc.Client
-	if cli, err = rpc.Dial("tcp", cfg.IPs[cfg.SrvType] + cfg.DaoPort); err != nil {
+	addr := cfg.IPs[cfg.RemoteType] + ":" + cfg.DaoPort
+	log.Debug("addr=", addr)
+	if cli, err = rpc.Dial("tcp", addr); err != nil {
 		return
 	}
 	return &Client{cli}, nil

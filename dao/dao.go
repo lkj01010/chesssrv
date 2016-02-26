@@ -1,29 +1,28 @@
 package dao
+import (
+	"github.com/garyburd/redigo/redis"
+)
 
-func Init(){
-
+type model struct {
+	c redis.Conn
+	parent *Models
 }
 
-func Exit(){
-	GameInst.exit()
-	UserInst.exit()
+type Models struct {
+	User *User
+	Game *Game
 }
 
-type exportModels struct {
-	models []interface{}
+func NewModels() *Models {
+	m := new(Models)
+	user := NewUser(m)
+	game := NewGame(m)
+	m.User = user
+	m.Game = game
+	return m
 }
 
-func NewExportModels() *exportModels {
-	em := &exportModels{
-		make([]interface{}),
-	}
-	append(em.models, NewUser())
-	append(em.models, NewGame())
-	return em
-}
-
-func (em *exportModels)Exit(){
-	for m in em.models {
-
-	}
+func (m *Models)Exit(){
+	m.User.exit()
+	m.Game.exit()
 }

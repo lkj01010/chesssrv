@@ -4,9 +4,8 @@ import (
 	"github.com/lkj01010/log"
 )
 
-func (cli *Client)UserRegister(accout, psw string, reply *fw.RpcReply) (err error) {
-	args := &UserRegisterArgs{accout, psw}
-	var reply fw.RpcReply
+func (cli *Client)UserRegister(account, psw string, reply *fw.RpcReply) (err error) {
+	args := &UserRegisterArgs{account, psw}
 	err = cli.cli.Call("User.HandleRegister", args, &reply)
 	if err != nil {
 		return
@@ -17,7 +16,6 @@ func (cli *Client)UserRegister(accout, psw string, reply *fw.RpcReply) (err erro
 
 func (cli *Client)UserAuth(account, psw string, reply *UserAuthReply) (err error) {
 	args := &UserAuthArgs{account, psw}
-	var reply UserAuthReply
 	if err = cli.cli.Call("User.HandleAuth", args, &reply); err != nil {
 		return
 	}
