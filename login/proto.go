@@ -67,7 +67,7 @@ type ToLobbyReq struct {
 }
 
 type ToLobbyResp struct {
-	Msg	string `json:"msg"`
+	Msg string `json:"msg"`
 }
 
 type ToRoomReq struct {

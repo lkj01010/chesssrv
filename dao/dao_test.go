@@ -6,13 +6,13 @@ import (
 	"net/rpc"
 	"chess/cfg"
 	log "github.com/lkj01010/log"
-"net"
+	"net"
 	"sync"
 )
 
 var once sync.Once
 
-func startServer(){
+func startServer() {
 	//register rpc
 	models := NewModels()
 	rpc.Register(models.User)
@@ -28,11 +28,11 @@ func startServer(){
 		log.Fatalf("net.Listen tcp : %v", e)
 	}
 	log.Info("dao RPC server listening on ", serverAddr)
-	rpc.Accept(l)
+	go rpc.Accept(l)
 }
 
 func TestBareClient(t *testing.T) {
-	once.Do(func(){
+	once.Do(func() {
 		go startServer()
 	})
 
@@ -65,8 +65,11 @@ func TestBareClient(t *testing.T) {
 	}
 }
 
-func TestDaoClient(t *testing.T){
-	once.Do(func(){go startServer()})
+func TestDaoClient(t *testing.T) {
+	//	once.Do(func() {go startServer()})
+	once.Do(startServer)
+
+	//	time.Sleep(3 * time.Second)
 
 	cli, err := NewClient()
 	log.Debug("tdc 1")
@@ -75,13 +78,13 @@ func TestDaoClient(t *testing.T){
 	}
 	{
 		var reply fw.RpcReply
-		if err := cli.UserRegister("zhu001", "21882", &reply); err != nil{
+		if err := cli.UserRegister("zhu001", "21882", &reply); err != nil {
 			log.Error(err.Error())
 		}
 	}
 	{
 		var reply UserAuthReply
-		if err := cli.UserAuth("zhu001", "21882", &reply); err != nil{
+		if err := cli.UserAuth("zhu001", "21882", &reply); err != nil {
 			log.Error(err.Error())
 		}
 	}

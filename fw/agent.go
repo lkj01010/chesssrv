@@ -3,9 +3,10 @@ import (
 	log "github.com/lkj01010/log"
 )
 
-type ReadWriter interface {
-	Read(msg *string) (err error)
-	Write(msg string) (err error)
+type ReadWriteCloser interface {
+	Read(msg *string) error
+	Write(msg string) error
+	Close() error
 }
 
 type Handler interface {
@@ -14,10 +15,10 @@ type Handler interface {
 
 type Agent struct {
 	Handler
-	ReadWriter
+	ReadWriteCloser
 }
 
-func NewAgent(h Handler, rw ReadWriter) *Agent {
+func NewAgent(h Handler, rw ReadWriteCloser) *Agent {
 	return &Agent{h, rw}
 }
 

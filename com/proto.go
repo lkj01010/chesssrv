@@ -2,11 +2,11 @@ package com
 import "encoding/json"
 
 type Msg struct {
-	Cmd int `json:"cmd"`
-	Content string `json:"cotent"`
+	Cmd     int `json:"cmd"`
+	Content string `json:"content"`
 }
 
-func MakeMsgString(cmd int, content interface{})(resp string){
+func MakeMsgString(cmd int, content interface{}) (resp string) {
 	var msg Msg
 	msg.Cmd = cmd
 

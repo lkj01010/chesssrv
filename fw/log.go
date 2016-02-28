@@ -2,6 +2,7 @@ package fw
 
 import (
 	"fmt"
+	log "github.com/lkj01010/log"
 )
 
 func init() {
@@ -12,6 +13,7 @@ func init() {
 	//		log.Fatalln("fail to create test.log file!")
 	//	}
 	//	log.Out = file
+	log.SetLevel(log.LevelDebug)
 }
 
 //func LogDebug(args ...interface{}){

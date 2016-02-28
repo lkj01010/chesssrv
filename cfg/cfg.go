@@ -32,6 +32,7 @@ var RedisIPs = map[string]string{
 
 const (
 	RedisPort = "6379"
+	LoginPort = "13000"
 	AgentPort = "13001"
 	LobbyPort = "13002"
 	GamePort = "13003"
@@ -41,4 +42,12 @@ const (
 func RedisAddr() (string) {
 	addr := RedisIPs[RemoteType] + ":" + RedisPort
 	return addr
+}
+
+func LoginAddr() string {
+	return IPs[RemoteType] + ":" + LoginPort
+}
+
+func DaoAddr() string {
+	return IPs[RemoteType] + ":" + DaoPort
 }

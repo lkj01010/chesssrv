@@ -5,12 +5,16 @@ import (
 	"chess/fw"
 	"chess/login"
 	log "github.com/lkj01010/log"
+	"chess/cfg"
 )
 
 
 
 func main() {
-	server := login.NewServer()
+	server, err := login.NewServer()
+	if err != nil {
+		panic("new server failed")
+	}
 	defer func() {
 		server.Close()
 	}()
@@ -19,9 +23,9 @@ func main() {
 		if err := server.Serve(fw.NewWsReadWriter(ws)); err != nil {
 			log.Error(err.Error())
 		}
-		log.Infof("new agent comes, agent count=%v", len(server.AgentCount()))
+		log.Infof("new agent comes, agent count=%v", server.AgentCount())
 	}
 
 	http.Handle("/", websocket.Handler(serve))
-	http.ListenAndServe(":8000", nil)
+	http.ListenAndServe(":" + cfg.LoginPort, nil)
 }
