@@ -9,7 +9,6 @@ import (
 
 type handler struct {
 	dc *dao.Client
-
 }
 
 func (h *handler)Handle(req string) (resp string, err error) {

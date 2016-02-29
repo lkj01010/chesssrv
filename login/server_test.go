@@ -126,9 +126,10 @@ func TestServer2(t *testing.T) {
 	}
 
 	msg := []byte(`{"cmd":100,
-		"content":"{\"account\":\"jieiie130\",\"psw\":\"pswlk在咋子。22\"}"
+		"content":"{\"account\":\"testUtf2\",\"psw\":\"pswlk在咋子。22\"}"
 		}`)
-	//	msg := []byte(`{"cmd":100,"content":"s"}`)
+
+//	utf8msg, _, _ := transform.String(simplifiedchinese.GBK.NewEncoder(), string(msg))
 	if _, err = conn.Write(msg); err != nil {
 		log.Error(err.Error())
 		return

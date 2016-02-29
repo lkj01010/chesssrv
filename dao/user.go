@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	AccountAccountPre = "account:account:"
-	AccountCountKey = "account:count"
-	IdKey = "id"
-	PswKey = "psw"
+	k_account_account_ = "account:account:"
+	k_account_count = "account:count"
+	k_id = "id"
+	k_psw = "psw"
 )
 
 type User struct {
@@ -39,7 +39,7 @@ func NewUser(p *Models) *User {
 	fw.PrintType(s, "s")
 
 	//fill keys
-	b, _ := redis.Bool(c.Do("EXISTS", AccountCountKey))
+	b, _ := redis.Bool(c.Do("EXISTS", k_account_count))
 
 	//	switch b.(type) {
 	//	case interface{}:
@@ -55,8 +55,8 @@ func NewUser(p *Models) *User {
 	//	}
 
 	if b == false {
-		c.Do("SET", AccountCountKey, 0)
-		log.Info("fill key:", AccountCountKey)
+		c.Do("SET", k_account_count, 0)
+		log.Info("fill key:", k_account_count)
 	}
 
 	//register model
@@ -73,13 +73,13 @@ type UserRegisterArgs struct {
 }
 
 func (u *User)HandleRegister(args *UserRegisterArgs, reply *fw.RpcReply) error {
-	accountkey := AccountAccountPre + args.Account
+	accountkey := k_account_account_ + args.Account
 	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
 	if !exists {
-		u.c.Do("INCR", AccountCountKey)
-		id, _ := u.c.Do("GET", AccountCountKey)
-		u.c.Do("HSET", accountkey, IdKey, id)
-		u.c.Do("HSET", accountkey, PswKey, args.Psw)
+		u.c.Do("INCR", k_account_count)
+		id, _ := u.c.Do("GET", k_account_count)
+		u.c.Do("HSET", accountkey, k_id, id)
+		u.c.Do("HSET", accountkey, k_psw, args.Psw)
 		reply.Code = com.E_Success
 		log.Debug("Register success")
 	}else {
@@ -100,15 +100,15 @@ type UserAuthReply struct {
 }
 
 func (u *User)HandleAuth(args *UserAuthArgs, reply *UserAuthReply) (err error) {
-	accountkey := AccountAccountPre + args.Account
+	accountkey := k_account_account_ + args.Account
 	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
 	if exists == false {
 		reply.Code = com.E_LoginAccountNotExist
 		log.Info("E_LoginAccountNotExist")
 	}else {
-		id, _ := redis.String(u.c.Do("HGET", accountkey, IdKey))
+		id, _ := redis.String(u.c.Do("HGET", accountkey, k_id))
 		//		fw.PrintType(id, "id")
-		pswvalue, _ := redis.String(u.c.Do("HGET", accountkey, PswKey))
+		pswvalue, _ := redis.String(u.c.Do("HGET", accountkey, k_psw))
 		if pswvalue == args.Psw {
 			reply.LoginKey = u.parent.Game.genLoginKey(id)
 			reply.Code = com.E_Success

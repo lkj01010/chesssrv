@@ -48,6 +48,14 @@ func LoginAddr() string {
 	return IPs[RemoteType] + ":" + LoginPort
 }
 
+func LobbyAddr() string{
+	return IPs[RemoteType] + ":" + LobbyPort
+}
+
+func GameAddr() string{
+	return IPs[RemoteType] + ":" + GamePort
+}
+
 func DaoAddr() string {
 	return IPs[RemoteType] + ":" + DaoPort
 }
