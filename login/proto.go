@@ -15,25 +15,15 @@ const (
 	cmdRegisterReq = 100
 	cmdRegisterResp = 101
 
-	cmdLoginReq = 102
-	cmdLoginResp = 103
-
-	cmdToLobbyReq = 200
-	cmdToLobbyResp = 201
-
-	cmdToGameReq = 202
-	cmdToGameResp = 203
+	cmdAuthReq = 102
+	cmdAuthResp = 103
 )
 
 var cmdText = &map[int]string{
 	cmdRegisterReq:    "registerReq",
 	cmdRegisterResp:    "registerResp",
-	cmdLoginReq:    "loginReq",
-	cmdLoginResp:    "loginResp",
-	cmdToLobbyReq:    "toLobbyReq",
-	cmdToLobbyResp:    "toLobbyResp",
-	cmdToGameReq:    "toGameReq",
-	cmdToGameResp:    "toGameResp",
+	cmdAuthReq:    "authReq",
+	cmdAuthResp:    "authResp",
 }
 
 //var loginMethodCodes map[string]int
@@ -44,12 +34,12 @@ var cmdText = &map[int]string{
 //	}
 //}
 
-type LoginReq struct {
+type AuthReq struct {
 	Account string `json:"account"`
 	Psw     string `json:"psw"`
 }
 
-type LoginResp struct {
+type AuthResp struct {
 	Code int `json:"code"`
 }
 

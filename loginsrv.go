@@ -9,7 +9,6 @@ import (
 )
 
 
-
 func main() {
 	server, err := login.NewServer()
 	if err != nil {
