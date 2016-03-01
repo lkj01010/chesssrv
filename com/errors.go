@@ -7,7 +7,7 @@ const (
 )
 
 const (
-	E_LoginAccountNotExist = 1000
-	E_LoginAccountExist = 1001
-	E_LoginPasswordIncorrect = 1002
+	E_AgentAccountNotExist = 1000
+	E_AgentAccountExist = 1001
+	E_AgentPasswordIncorrect = 1002
 )

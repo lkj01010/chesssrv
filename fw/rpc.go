@@ -4,12 +4,8 @@ import (
 	"github.com/lkj01010/log"
 )
 
-type RpcReply struct {
-	Code int `json:"code"`
-}
-
 type RpcClient struct {
-	Cli *rpc.Client
+	*rpc.Client
 }
 
 func NewRpcClient(addr string) (c *RpcClient, err error) {
@@ -22,7 +18,7 @@ func NewRpcClient(addr string) (c *RpcClient, err error) {
 
 func (c *RpcClient)Close() error {
 	log.Debug("rpc client close")
-	if err := c.Cli.Close(); err != nil {
+	if err := c.Close(); err != nil {
 		return err
 	}
 	return nil

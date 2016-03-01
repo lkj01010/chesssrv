@@ -68,11 +68,11 @@ func (u *User)exit() {
 	u.c.Close()
 }
 
-type UserRegisterArgs struct {
+type User_RegisterArgs struct {
 	Account, Psw string
 }
 
-func (u *User)HandleRegister(args *UserRegisterArgs, reply *fw.RpcReply) error {
+func (u *User)Register(args *User_RegisterArgs, reply *RpcReply) error {
 	accountkey := k_account_account_ + args.Account
 	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
 	if !exists {
@@ -83,27 +83,27 @@ func (u *User)HandleRegister(args *UserRegisterArgs, reply *fw.RpcReply) error {
 		reply.Code = com.E_Success
 		log.Debug("Register success")
 	}else {
-		reply.Code = com.E_LoginAccountExist
-		log.Debug("E_LoginAccountExist")
+		reply.Code = com.E_AgentAccountExist
+		log.Debug("E_AgentAccountExist")
 	}
 
 	return nil
 }
 
-type UserAuthArgs struct {
+type User_AuthArgs struct {
 	Account, Psw string
 }
 
-type UserAuthReply struct {
+type User_AuthReply struct {
 	Code     int
 	LoginKey string
 }
 
-func (u *User)HandleAuth(args *UserAuthArgs, reply *UserAuthReply) (err error) {
+func (u *User)Auth(args *User_AuthArgs, reply *User_AuthReply) (err error) {
 	accountkey := k_account_account_ + args.Account
 	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
 	if exists == false {
-		reply.Code = com.E_LoginAccountNotExist
+		reply.Code = com.E_AgentAccountNotExist
 		log.Info("E_LoginAccountNotExist")
 	}else {
 		id, _ := redis.String(u.c.Do("HGET", accountkey, k_id))
@@ -113,8 +113,8 @@ func (u *User)HandleAuth(args *UserAuthArgs, reply *UserAuthReply) (err error) {
 			reply.LoginKey = u.parent.Game.genLoginKey(id)
 			reply.Code = com.E_Success
 		}else {
-			reply.Code = com.E_LoginPasswordIncorrect
-			log.Info("E_LoginPasswordIncorrect")
+			reply.Code = com.E_AgentPasswordIncorrect
+			log.Info("E_AgentPasswordIncorrect")
 		}
 	}
 	return

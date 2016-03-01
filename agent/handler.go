@@ -3,7 +3,6 @@ import (
 	"encoding/json"
 	"chess/com"
 	"chess/dao"
-	"chess/fw"
 	log "github.com/lkj01010/log"
 )
 
@@ -29,7 +28,7 @@ func (h *handler)Handle(req string) (resp string, err error) {
 		resp, err = h.handleLogin(msg.Content)
 	}
 
-	if err != nil{
+	if err != nil {
 		log.Error("handle err: ", err.Error())
 	}
 	return
@@ -42,12 +41,16 @@ func (h *handler)handleRegister(content string) (resp string, err error) {
 		log.Error("content=", content, ", err: ", err.Error())
 		return
 	}
-	var reply fw.RpcReply
+	args := &dao.User_RegisterArgs{req.Account, req.Psw}
+	var reply dao.RpcReply
 	log.Debugf("req : %#v", req)
-	if err = h.dc.UserRegister(req.Account, req.Psw, &reply); err != nil {
+	//	if err = h.dc.UserRegister(&args, &reply); err != nil {
+	if err = h.dc.Call("User.Register", args, &reply); err != nil {
 		return
 	}
-	resp = com.MakeMsgString(cmdRegisterResp, reply)
+	log.Infof("User.Register %+v -> %+v",args,reply)
+	respContent := &RegisterResp{reply.Code}
+	resp = com.MakeMsgString(cmdRegisterResp, respContent)
 	return
 }
 
@@ -56,23 +59,17 @@ func (h *handler)handleAuth(content string) (resp string, err error) {
 	if err = json.Unmarshal([]byte(content), &req); err != nil {
 		return
 	}
-	var reply dao.UserAuthReply
-	if err = h.dc.UserAuth(req.Account, req.Psw, &reply); err != nil {
+	args := &dao.User_AuthArgs{req.Account, req.Psw}
+	var reply dao.User_AuthReply
+	if err = h.dc.Call("User.Auth", args, &reply); err != nil {
 		return
 	}
-	resp = com.MakeMsgString(cmdAuthResp, reply)
+	respContent := &AuthResp{reply.Code}
+	resp = com.MakeMsgString(cmdAuthResp, respContent)
 	return
 }
 
 func (h *handler)handleLogin(content string) (resp string, err error) {
-	var req LoginReq
-	if err = json.Unmarshal([]byte(content), &req); err != nil {
-		return
-	}
-	var reply dao.UserAuthReply
-	if err = h.dc.UserAuth(req.Account, req.Psw, &reply); err != nil {
-		return
-	}
-	resp = com.MakeMsgString(cmdLoginResp, reply)
+	resp = com.MakeMsgString(cmdLoginResp, "")
 	return
 }

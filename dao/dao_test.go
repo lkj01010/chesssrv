@@ -2,7 +2,6 @@ package dao
 
 import (
 	"testing"
-	"chess/fw"
 	"net/rpc"
 	"chess/cfg"
 	log "github.com/lkj01010/log"
@@ -45,8 +44,8 @@ func TestBareClient(t *testing.T) {
 
 	// register
 	{
-		args := &UserRegisterArgs{"xxxaccount", "xxxpsw"}
-		var reply fw.RpcReply
+		args := &User_RegisterArgs{"xxxaccount", "xxxpsw"}
+		var reply RpcReply
 		err = client.Call("User.HandleRegister", args, &reply)
 		if err != nil {
 			log.Error("HandleRegister error:", err)
@@ -56,8 +55,8 @@ func TestBareClient(t *testing.T) {
 
 	// auth
 	{
-		args := &UserAuthArgs{"xxxaccount", "xxxpsw"}
-		var reply UserAuthReply
+		args := &User_AuthArgs{"xxxaccount", "xxxpsw"}
+		var reply User_AuthReply
 		if err = client.Call("User.HandleAuth", args, &reply); err != nil {
 			log.Error("HandleAuth", err)
 		}
@@ -77,14 +76,16 @@ func TestDaoClient(t *testing.T) {
 		log.Error("new client error: ", err.Error())
 	}
 	{
-		var reply fw.RpcReply
-		if err := cli.UserRegister("zhu001", "21882", &reply); err != nil {
+		var reply RpcReply
+		args := User_AuthArgs{"zhu001", "21882"}
+		if err := cli.UserRegister(&args, &reply); err != nil {
 			log.Error(err.Error())
 		}
 	}
 	{
-		var reply UserAuthReply
-		if err := cli.UserAuth("zhu001", "21882", &reply); err != nil {
+		var reply User_AuthReply
+		args := User_AuthArgs{"zhu001", "21882"}
+		if err := cli.UserAuth(&args, &reply); err != nil {
 			log.Error(err.Error())
 		}
 	}

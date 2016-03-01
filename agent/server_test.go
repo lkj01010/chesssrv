@@ -16,11 +16,11 @@ import (
 
 func newClient() (*websocket.Conn, error) {
 	//todo
-	client, err := net.Dial("tcp", cfg.LoginAddr())
+	client, err := net.Dial("tcp", cfg.AgentAddr())
 	if err != nil {
 		return nil, err
 	}
-	conn, err := websocket.NewClient(newConfig("/login"), client)
+	conn, err := websocket.NewClient(newConfig("/agent"), client)
 	if err != nil {
 		log.Errorf("WebSocket handshake error: %v", err)
 		return nil, err
@@ -35,7 +35,7 @@ func startServer1() {
 		agent.Serve()
 	}
 
-	http.Handle("/login", websocket.Handler(serve))
+	http.Handle("/agent", websocket.Handler(serve))
 	//	http.ListenAndServe(":8000", nil)
 
 	server := httptest.NewServer(nil)
@@ -61,8 +61,8 @@ func startServer2() {
 	}
 
 	http.Handle("/", websocket.Handler(serve))
-	http.ListenAndServe(cfg.LoginAddr(), nil)
-	log.Info("server2 serve on ", cfg.LoginAddr())
+	http.ListenAndServe(cfg.AgentAddr(), nil)
+	log.Info("server2 serve on ", cfg.AgentAddr())
 }
 
 var (
@@ -84,7 +84,7 @@ func TestServer1(t *testing.T) {
 		t.Fatal("dialing", err)
 	}
 	log.Info("t=%v", t)
-	conn, err := websocket.NewClient(newConfig("/login"), client)
+	conn, err := websocket.NewClient(newConfig("/agent"), client)
 	if err != nil {
 		t.Errorf("WebSocket handshake error: %v", err)
 		return

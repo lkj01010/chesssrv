@@ -4,6 +4,7 @@ import (
 	"chess/fw"
 )
 
+//todo: remove this file
 type Client struct {
 	*fw.RpcClient
 }

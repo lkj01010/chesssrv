@@ -25,5 +25,6 @@ func main() {
 	}
 
 	http.Handle("/", websocket.Handler(serve))
+	log.Debug("agent server start on:", cfg.AgentPort)
 	http.ListenAndServe(":" + cfg.AgentPort, nil)
 }

@@ -1,8 +1,12 @@
 package dao
-import (
-	"github.com/garyburd/redigo/redis"
-)
+import "github.com/garyburd/redigo/redis"
 
+// common reply for rpc, special reply defined in rpc_*.go
+type RpcReply struct {
+	Code int
+}
+
+// model
 type model struct {
 	c redis.Conn
 	parent *Models
