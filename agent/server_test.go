@@ -1,4 +1,4 @@
-package login
+package agent
 import (
 	"testing"
 	"golang.org/x/net/websocket"

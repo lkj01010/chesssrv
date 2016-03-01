@@ -3,14 +3,14 @@ import (
 	"net/http"
 	"golang.org/x/net/websocket"
 	"chess/fw"
-	"chess/login"
+	"chess/agent"
 	log "github.com/lkj01010/log"
 	"chess/cfg"
 )
 
 
 func main() {
-	server, err := login.NewServer()
+	server, err := agent.NewServer()
 	if err != nil {
 		panic("new server failed")
 	}

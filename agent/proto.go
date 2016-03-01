@@ -2,11 +2,23 @@ package agent
 import (
 )
 
+/*
+	proto should be:
+	{
+		method: int,
+		params: obj
+	}
+
+ */
 
 const (
-	cmdLoginReq = 100
-	cmdLoginResp = 101
+	cmdRegisterReq = 100
+	cmdRegisterResp = 101
 
+	cmdAuthReq = 102
+	cmdAuthResp = 103
+	cmdLoginReq = 104
+	cmdLoginResp = 105
 
 	cmdToLobbyReq = 200
 	cmdToLobbyResp = 201
@@ -16,21 +28,48 @@ const (
 )
 
 var cmdText = &map[int]string{
+	cmdRegisterReq:    "registerReq",
+	cmdRegisterResp:    "registerResp",
+	cmdAuthReq:    "authReq",
+	cmdAuthResp:    "authResp",
 	cmdLoginReq:    "loginReq",
 	cmdLoginResp:    "loginResp",
+
 	cmdToLobbyReq:    "toLobbyReq",
 	cmdToLobbyResp:    "toLobbyResp",
 	cmdToGameReq:    "toGameReq",
 	cmdToGameResp:    "toGameResp",
 }
 
-type LoginReq struct {
+//var loginMethodCodes map[string]int
+//
+//func init() {
+//	if loginMethodCodes, err := json.Marshal(loginMethodCodeJson); err != nil {
+//		fw.Log.WithField("json.Marshal.err", err.Error()).Error("login:proto:init error")
+//	}
+//}
+
+//用户认证
+type AuthReq struct {
+	Account string `json:"account"`
+	Psw     string `json:"psw"`
+}
+type AuthResp struct {
+	Code int `json:"code"`
+}
+
+type RegisterReq struct {
 	Account string `json:"account"`
 	Psw     string `json:"psw"`
 }
 
-type LoginResp struct {
+type RegisterResp struct {
 	Code int `json:"code"`
+}
+
+type LoginReq struct {
+	Account string `json:"account"`
+	Psw     string `json:"psw"`
 }
 
 type ToLobbyReq struct {

@@ -14,7 +14,7 @@ type Server struct {
 func NewServer() (*Server, error) {
 	dc, err := dao.NewClient()
 	if err != nil {
-		log.Error("agentsrv: dao client create err=", err.Error())
+		log.Error("dao client create err=", err.Error())
 		return nil, err
 	}
 	return &Server{

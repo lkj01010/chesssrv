@@ -23,9 +23,12 @@ func (h *handler)Handle(req string) (resp string, err error) {
 	switch msg.Cmd {
 	case cmdRegisterReq:
 		resp, err = h.handleRegister(msg.Content)
+	case cmdAuthReq:
+		resp, err = h.handleAuth(msg.Content)
 	case cmdLoginReq:
 		resp, err = h.handleLogin(msg.Content)
 	}
+
 	if err != nil{
 		log.Error("handle err: ", err.Error())
 	}
@@ -45,6 +48,19 @@ func (h *handler)handleRegister(content string) (resp string, err error) {
 		return
 	}
 	resp = com.MakeMsgString(cmdRegisterResp, reply)
+	return
+}
+
+func (h *handler)handleAuth(content string) (resp string, err error) {
+	var req AuthReq
+	if err = json.Unmarshal([]byte(content), &req); err != nil {
+		return
+	}
+	var reply dao.UserAuthReply
+	if err = h.dc.UserAuth(req.Account, req.Psw, &reply); err != nil {
+		return
+	}
+	resp = com.MakeMsgString(cmdAuthResp, reply)
 	return
 }
 
