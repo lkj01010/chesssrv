@@ -5,7 +5,10 @@ import (
 	log "github.com/lkj01010/log"
 	"net/rpc"
 	"chess/cfg"
+	"time"
 )
+
+
 
 type Server struct {
 	dao    *rpc.Client
@@ -44,7 +47,11 @@ func (s *Server)Serve(rw fw.ReadWriteCloser) (err error) {
 	//todo: get id
 	id := strconv.Itoa(fw.FastRand())
 
-	agent := fw.NewAgent(&handler{s.dao}, rw)
+	agent := fw.NewAgent(&handler{
+		dao: s.dao,
+		isTimeout: false,
+		heartbeatTimer: time.NewTimer(timeoutDuration),
+	}, rw)
 	defer agent.Close()	// close it!
 
 	s.agents[id] = agent

@@ -33,7 +33,7 @@ func (a *Agent)Serve() (err error) {
 		//		fmt.Println("id=" + ra.Id() + ", read=" + buf)
 		resp, err = a.Handle(buf)
 		if err != nil {
-			log.Error("handle error:", err.Error())
+			log.Error("agent serve:", err.Error())
 			return
 		}
 		//		if resp != "" {

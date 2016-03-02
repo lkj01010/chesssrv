@@ -12,6 +12,7 @@ import (
  */
 
 const (
+	cmdHeartbeat = 10
 	cmdRegisterReq = 100
 	cmdRegisterResp = 101
 
@@ -28,6 +29,7 @@ const (
 )
 
 var cmdText = &map[int]string{
+	cmdHeartbeat:	"heartbeat",
 	cmdRegisterReq:    "registerReq",
 	cmdRegisterResp:    "registerResp",
 	cmdAuthReq:    "authReq",
