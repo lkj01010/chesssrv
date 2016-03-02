@@ -4,22 +4,25 @@ import (
 	"chess/com"
 	"chess/dao"
 	log "github.com/lkj01010/log"
-	"time"
 	"net/rpc"
-)
-const (
-	timeoutDuration = 5 * time.Second
 )
 
 type handler struct {
 	dao            *rpc.Client
 	isTimeout      bool
-	heartbeatTimer time.Timer
 }
 
 func NewHandle(dao *rpc.Client, isTimeout bool) *handler {
-	t := time.NewTimer(timeoutDuration)
+	h := &handler{
+		dao: dao,
+	}
+	return h
+}
 
+func (h *handler)checkHbTimeout() {
+	if h.isTimeout == false {
+
+	}
 }
 
 func (h *handler)Handle(req string) (resp string, err error) {
@@ -33,7 +36,7 @@ func (h *handler)Handle(req string) (resp string, err error) {
 
 	switch msg.Cmd {
 	case cmdHeartbeat:
-		resp, err = h.handleHeartbeat()
+		h.handleHeartbeat()
 	case cmdRegisterReq:
 		resp, err = h.handleRegister(msg.Content)
 	case cmdAuthReq:
@@ -48,8 +51,9 @@ func (h *handler)Handle(req string) (resp string, err error) {
 	return
 }
 func (h *handler)handleHeartbeat() {
-
+	// do nothing
 }
+
 func (h *handler)handleRegister(content string) (resp string, err error) {
 	//	daocli.
 	var req RegisterReq

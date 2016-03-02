@@ -1,6 +1,7 @@
 package fw
 import (
 	log "github.com/lkj01010/log"
+	"time"
 )
 
 type ReadWriteCloser interface {
@@ -16,31 +17,61 @@ type Handler interface {
 type Agent struct {
 	Handler
 	ReadWriteCloser
+	ctrl chan string
 }
 
 func NewAgent(h Handler, rw ReadWriteCloser) *Agent {
-	return &Agent{h, rw}
+	return &Agent{h, rw, make(chan string, 0)}
 }
 
 func (a *Agent)Serve() (err error) {
-	var buf, resp string
-	for {
-		err = a.Read(&buf)
-		if err != nil {
-			log.Error("read error:", err.Error())
-			return
+	session := make(chan string, 0)
+	go func(c chan string) {
+		var buf string
+		for {
+			err = a.Read(&buf)
+			if err != nil {
+				log.Debug("agent read: ", err.Error())
+				return
+			}
+			c <-buf
 		}
-		//		fmt.Println("id=" + ra.Id() + ", read=" + buf)
-		resp, err = a.Handle(buf)
-		if err != nil {
-			log.Error("agent serve:", err.Error())
-			return
+	}(session)
+
+	timeout := time.NewTimer(0)
+L:	for {
+		timeout.Reset(5 * time.Second)
+		select {
+		case msg := <-session:
+			var resp string
+			resp, err = a.Handle(msg)
+			if err != nil {
+				log.Error("agent session: ", err.Error())
+				return
+			}
+			a.Write(resp)
+			log.Debug("recv msg")
+		case <-timeout.C:
+			log.Debug("recv timeout")
+			break L
+		case <-a.ctrl:
+			log.Debug("recv ctrl")
+			break;
 		}
-		//		if resp != "" {
-		a.Write(resp)
-		//		}else{
-		//			a.Write("recive ''")
-		//		}
 	}
+
+	//	var buf, resp string
+	//	err = a.Read(&buf):
+	//	if err != nil {
+	//		log.Error("read error:", err.Error())
+	//		return
+	//	}
+	//	resp, err = a.Handle(buf)
+	//	if err != nil {
+	//		log.Error("agent serve:", err.Error())
+	//		return
+	//	}
+	//	a.Write(resp)
+
 	return
 }

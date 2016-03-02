@@ -13,6 +13,6 @@ const (
 	E_AgentPasswordIncorrect = 1002
 )
 
-const (
+var (
 	ErrClientTimeout = errors.New("client timeout")
 )

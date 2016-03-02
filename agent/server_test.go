@@ -139,5 +139,29 @@ func TestServer2(t *testing.T) {
 		log.Error(err.Error())
 		return
 	}
+	time.Sleep(1 * time.Second)
 
+	log.Info("there1")
+	//
+	if _, err = conn.Write(msg); err != nil {
+		log.Error(err.Error())
+		return
+	}
+	if err = websocket.Message.Receive(conn, &rec); err != nil {
+		log.Error(err.Error())
+		return
+	}
+	time.Sleep(1 * time.Second)
+
+
+	log.Info("there2")
+	if _, err = conn.Write(msg); err != nil {
+		log.Error(err.Error())
+		return
+	}
+	if err = websocket.Message.Receive(conn, &rec); err != nil {
+		log.Error(err.Error())
+		return
+	}
+	time.Sleep(60 * time.Second)
 }
