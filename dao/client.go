@@ -1,18 +1,20 @@
 package dao
 import (
 	"chess/cfg"
-	"chess/fw"
+	"net/rpc"
 )
 
-//todo: remove this file
+//todo: del
 type Client struct {
-	*fw.RpcClient
+	rpc.Client
 }
 
 func NewClient() (c *Client, err error) {
-	var rc *fw.RpcClient
-	rc, err = fw.NewRpcClient(cfg.DaoAddr())
-	c = &Client{rc}
+	var cli *rpc.Client
+	if cli, err = rpc.Dial("tcp", cfg.DaoAddr()); err != nil {
+		return
+	}
+	c = &Client{*cli}
 	return
 }
 
