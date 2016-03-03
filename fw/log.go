@@ -13,7 +13,9 @@ func init() {
 	//		log.Fatalln("fail to create test.log file!")
 	//	}
 	//	log.Out = file
+
 	log.SetLevel(log.LevelDebug)
+//	log.SetLevel(log.LevelInfo)
 }
 
 //func LogDebug(args ...interface{}){

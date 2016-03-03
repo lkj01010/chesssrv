@@ -56,17 +56,10 @@ type AuthReq struct {
 	Account string `json:"account"`
 	Psw     string `json:"psw"`
 }
-type AuthResp struct {
-	Code int `json:"code"`
-}
 
 type RegisterReq struct {
 	Account string `json:"account"`
 	Psw     string `json:"psw"`
-}
-
-type RegisterResp struct {
-	Code int `json:"code"`
 }
 
 type LoginReq struct {

@@ -4,33 +4,41 @@ import (
 	"time"
 )
 
+const (
+	CtrlRemoveAgent = "removeAgent"
+)
+
 type ReadWriteCloser interface {
 	Read(msg *string) error
 	Write(msg string) error
 	Close() error
 }
 
-type Handler interface {
+type Model interface {
+	Enter()
 	Handle(req string) (resp string, err error)
+	Exit()
 }
 
 type Agent struct {
-	Handler
+	Model
 	ReadWriteCloser
-	ctrl chan string
+	Ctrl chan string
 }
 
-func NewAgent(h Handler, rw ReadWriteCloser) *Agent {
+func NewAgent(h Model, rw ReadWriteCloser) *Agent {
 	return &Agent{h, rw, make(chan string, 0)}
 }
 
 func (a *Agent)Serve() (err error) {
+	a.Enter()
 	session := make(chan string, 0)
 	go func(c chan string) {
 		var buf string
 		for {
 			err = a.Read(&buf)
 			if err != nil {
+				//todo: 通过正常流程退出
 				log.Debug("agent read: ", err.Error())
 				return
 			}
@@ -40,7 +48,7 @@ func (a *Agent)Serve() (err error) {
 
 	timeout := time.NewTimer(0)
 L:	for {
-		timeout.Reset(5 * time.Second)
+		timeout.Reset(10 * time.Second)
 		select {
 		case msg := <-session:
 			var resp string
@@ -54,9 +62,11 @@ L:	for {
 		case <-timeout.C:
 			log.Debug("recv timeout")
 			break L
-		case <-a.ctrl:
-			log.Debug("recv ctrl")
-			break;
+		case ctrl := <-a.Ctrl:
+			if ctrl == CtrlRemoveAgent {
+				log.Debug("recv ctrl: CtrlRemoveAgent")
+				break L
+			}
 		}
 	}
 
@@ -72,6 +82,8 @@ L:	for {
 	//		return
 	//	}
 	//	a.Write(resp)
+
+	a.Exit()
 
 	return
 }

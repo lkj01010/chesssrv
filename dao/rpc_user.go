@@ -9,10 +9,13 @@ import (
 )
 
 const (
-	k_account_account_ = "account:account:"
-	k_account_count = "account:count"
-	k_id = "id"
-	k_psw = "psw"
+	k_account_user_ = "account:user:"	// + account = id [string]
+	k_account_count = "account:count"		// [string]
+	k_account_userlist = "account:userlist"	// [set]
+	k_psw = "psw"	// [string]
+
+	k_user_ = "user:"	// + id [hash]
+	k_gold = "gold" //
 )
 
 type User struct {
@@ -73,11 +76,12 @@ type User_RegisterArgs struct {
 }
 
 func (u *User)Register(args *User_RegisterArgs, reply *RpcReply) error {
-	accountkey := k_account_account_ + args.Account
+	accountkey := k_account_user_ + args.Account
 	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
 	if !exists {
 		u.c.Do("INCR", k_account_count)
 		id, _ := u.c.Do("GET", k_account_count)
+		//todo : id
 		u.c.Do("HSET", accountkey, k_id, id)
 		u.c.Do("HSET", accountkey, k_psw, args.Psw)
 		reply.Code = com.E_Success
@@ -117,5 +121,26 @@ func (u *User)Auth(args *User_AuthArgs, reply *User_AuthReply) (err error) {
 			log.Info("E_AgentPasswordIncorrect")
 		}
 	}
+	return
+}
+
+type User_InfoArgs struct {
+	Account string
+}
+
+//test
+type User_Info struct {
+	Id string
+	Nickname string
+	Gold int
+}
+type User_InfoReply struct {
+	Code     int
+	Info User_Info
+	LoginKey string
+}
+
+// todo:
+func (u *User)Info(args *User_InfoArgs, reply *User_InfoReply) (err error) {
 	return
 }

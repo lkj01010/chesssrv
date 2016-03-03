@@ -21,7 +21,7 @@ func main() {
 		if err := server.Serve(fw.NewWsReadWriter(ws)); err != nil {
 			log.Error(err.Error())
 		}
-		log.Infof("new agent comes, agent count=%v", server.AgentCount())
+		log.Infof("agent leaves, agent count=%v", server.AgentCount())
 	}
 
 	http.Handle("/", websocket.Handler(serve))

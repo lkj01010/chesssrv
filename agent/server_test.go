@@ -20,7 +20,7 @@ func newClient() (*websocket.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	conn, err := websocket.NewClient(newConfig("/agent"), client)
+	conn, err := websocket.NewClient(newConfig("/"), client)
 	if err != nil {
 		log.Errorf("WebSocket handshake error: %v", err)
 		return nil, err
@@ -28,10 +28,23 @@ func newClient() (*websocket.Conn, error) {
 	return conn, nil
 }
 
+func sendMsg(conn *websocket.Conn, msg []byte) (err error){
+	if _, err = conn.Write(msg); err != nil {
+		log.Error(err.Error())
+		return
+	}
+	var rec string
+	if err = websocket.Message.Receive(conn, &rec); err != nil {
+		log.Error(err.Error())
+		return
+	}
+	return
+}
+
 func startServer1() {
 	serve := func(ws *websocket.Conn) {
 		fmt.Printf("agent come")
-		agent := fw.NewAgent(&handler{}, fw.NewWsReadWriter(ws))
+		agent := fw.NewAgent(&model{}, fw.NewWsReadWriter(ws))
 		agent.Serve()
 	}
 
@@ -54,10 +67,11 @@ func startServer2() {
 	}()
 
 	serve := func(ws *websocket.Conn) {
+		log.Debug("new agent")
 		if err := server.Serve(fw.NewWsReadWriter(ws)); err != nil {
 			log.Error(err.Error())
 		}
-		log.Infof("new agent comes, agent count=%v", server.AgentCount())
+		log.Debug("agent leave")
 	}
 
 	http.Handle("/", websocket.Handler(serve))
@@ -117,9 +131,11 @@ func TestServer2(t *testing.T) {
 		once.Do(startServer2)
 	}()
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(5 * time.Second)
 
 	conn, err := newClient()
+	defer conn.Close()
+
 	if err != nil {
 		log.Error("newClient: ", err.Error())
 		return
@@ -129,39 +145,26 @@ func TestServer2(t *testing.T) {
 		"content":"{\"account\":\"testUtf2\",\"psw\":\"pswlk在咋子。22\"}"
 		}`)
 
-//	utf8msg, _, _ := transform.String(simplifiedchinese.GBK.NewEncoder(), string(msg))
-	if _, err = conn.Write(msg); err != nil {
-		log.Error(err.Error())
-		return
-	}
-	var rec string
-	if err = websocket.Message.Receive(conn, &rec); err != nil {
-		log.Error(err.Error())
-		return
-	}
-	time.Sleep(1 * time.Second)
-
+//	if _, err = conn.Write(msg); err != nil {
+//		log.Error(err.Error())
+//		return
+//	}
+//	var rec string
+//	if err = websocket.Message.Receive(conn, &rec); err != nil {
+//		log.Error(err.Error())
+//		return
+//	}
+	sendMsg(conn, msg)
 	log.Info("there1")
-	//
-	if _, err = conn.Write(msg); err != nil {
-		log.Error(err.Error())
-		return
-	}
-	if err = websocket.Message.Receive(conn, &rec); err != nil {
-		log.Error(err.Error())
-		return
-	}
 	time.Sleep(1 * time.Second)
 
-
+	sendMsg(conn, msg)
 	log.Info("there2")
-	if _, err = conn.Write(msg); err != nil {
-		log.Error(err.Error())
-		return
-	}
-	if err = websocket.Message.Receive(conn, &rec); err != nil {
-		log.Error(err.Error())
-		return
-	}
+	time.Sleep(1 * time.Second)
+
+	sendMsg(conn, msg)
+	log.Info("there2")
+	time.Sleep(1 * time.Second)
+
 	time.Sleep(60 * time.Second)
 }
