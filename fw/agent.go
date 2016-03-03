@@ -38,7 +38,7 @@ func (a *Agent)Serve() (err error) {
 		for {
 			err = a.Read(&buf)
 			if err != nil {
-				//todo: 通过正常流程退出
+				//fixme: 通过正常流程退出
 				log.Debug("agent read: ", err.Error())
 				return
 			}

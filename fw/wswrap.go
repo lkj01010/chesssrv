@@ -1,7 +1,7 @@
 package fw
 import (
-	"fmt"
 	"golang.org/x/net/websocket"
+	"github.com/lkj01010/log"
 )
 
 type WsClient struct {
@@ -14,18 +14,18 @@ func NewWsReadWriter(ws *websocket.Conn) *WsClient {
 
 func (w *WsClient)Read(msg *string) (err error) {
 	err = websocket.Message.Receive(w.ws, msg)
-	fmt.Printf("recv: %#v\n", *msg)
+	log.Debugf("recv: %#v\n", *msg)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 	return
 }
 
 func (w *WsClient)Write(msg string) (err error) {
 	err = websocket.Message.Send(w.ws, msg)
-	fmt.Printf("send: %#v\n", msg)
+	log.Debugf("send: %#v\n", msg)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 	return
 }

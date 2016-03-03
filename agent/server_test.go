@@ -141,8 +141,9 @@ func TestServer2(t *testing.T) {
 		return
 	}
 
+	log.Info("test:register")
 	msg := []byte(`{"cmd":100,
-		"content":"{\"account\":\"testUtf2\",\"psw\":\"pswlk在咋子。22\"}"
+		"content":"{\"account\":\"testUtf\",\"psw\":\"pswlk22\"}"
 		}`)
 
 //	if _, err = conn.Write(msg); err != nil {
@@ -155,16 +156,19 @@ func TestServer2(t *testing.T) {
 //		return
 //	}
 	sendMsg(conn, msg)
-	log.Info("there1")
 	time.Sleep(1 * time.Second)
+
+	log.Info("test:register")
+	msg = []byte(`{"cmd":104,
+				"content":"{\"account\":\"testUtf\",\"psw\":\"pswlk22\"}"}`)
 
 	sendMsg(conn, msg)
-	log.Info("there2")
 	time.Sleep(1 * time.Second)
 
+	msg = []byte(`{"cmd":104,
+				"content":"{\"account\":\"testUtf\",\"psw\":\"p\"}"}`)
+	log.Info("test:register2")
 	sendMsg(conn, msg)
-	log.Info("there2")
 	time.Sleep(1 * time.Second)
 
-	time.Sleep(60 * time.Second)
 }
