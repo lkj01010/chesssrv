@@ -2,15 +2,6 @@ package agent
 import (
 )
 
-/*
-	proto should be:
-	{
-		method: int,
-		params: obj
-	}
-
- */
-
 const (
 	cmdHeartbeat = 10
 	cmdRegisterReq = 100

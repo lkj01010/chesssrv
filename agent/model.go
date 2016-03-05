@@ -9,23 +9,21 @@ import (
 
 //数据处理模块
 type model struct {
-	dao     *rpc.Client
+	dao *rpc.Client
 
-	isLogin bool
-	id      string
-
+	// 登录成功后赋值.通过是否为""判断是否登录
+	id  string
 }
 
-func NewModel(dao *rpc.Client, isTimeout bool) *model {
-	m := &model{
-		dao: dao,
-	}
-	return m
-}
+//func NewModel(dao *rpc.Client, isTimeout bool) *model {
+//	m := &model{
+//		dao: dao,
+//	}
+//	return m
+//}
 
 func (m *model)Enter() {
-	m.isLogin = false
-	m.id = "undefined"
+	m.id = ""
 }
 
 func (m *model)Exit() {
@@ -103,6 +101,11 @@ func (m *model)handleLogin(content string) (resp string, err error) {
 	if err = m.dao.Call("User.Auth", args, &reply); err != nil {
 		return
 	}
+	if reply.Code == com.E_Success {
+		//登录成功,记录用户id
+		m.id = reply.UserId
+	}
+	log.Debugf("handleLogin1, reply=%+v", reply)
 	resp = com.MakeMsgString(cmdLoginResp, reply.Code, nil)
 	return
 }

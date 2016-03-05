@@ -11,6 +11,7 @@ const (
 	E_AgentAccountNotExist = 1000
 	E_AgentAccountExist = 1001
 	E_AgentPasswordIncorrect = 1002
+	E_AgentPasswordCannotBeNull = 1003
 )
 
 var (
