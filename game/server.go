@@ -1,20 +1,9 @@
 package game
 import (
-	"github.com/garyburd/redigo/redis"
+	"net/rpc"
 )
 
-type model struct {
-	c      redis.Conn
-	parent *Models
-}
+type Server struct {
+	Dao    *rpc.Client
 
-type Models struct {
-}
-
-func NewModels() *Models {
-	m := new(Models)
-	return m
-}
-
-func (m *Models)Exit() {
 }

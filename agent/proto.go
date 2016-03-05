@@ -11,6 +11,8 @@ const (
 	cmdAuthResp = 103
 	cmdLoginReq = 104
 	cmdLoginResp = 105
+	cmdInfoReq = 106
+	cmdInfoResp = 107
 
 	cmdToLobbyReq = 200
 	cmdToLobbyResp = 201
@@ -57,6 +59,10 @@ type LoginReq struct {
 	Account string `json:"account"`
 	Psw     string `json:"psw"`
 }
+
+
+/////////////////////////////////////////////
+// remote
 
 type ToLobbyReq struct {
 	Msg string `json:"msg"`

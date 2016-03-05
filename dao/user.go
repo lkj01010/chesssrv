@@ -103,8 +103,8 @@ type User_AuthArgs struct {
 }
 
 type User_AuthReply struct {
-	Code   int
-	UserId string
+	Code int
+	Id   string
 }
 
 func (u *User)Auth(args *User_AuthArgs, reply *User_AuthReply) (err error) {
@@ -122,13 +122,13 @@ func (u *User)Auth(args *User_AuthArgs, reply *User_AuthReply) (err error) {
 	//		reply.Code = com.E_Success
 	//	}
 
-	log.Debugf("Auth:psw=%+v", psw)
-	if psw == "" {
+	log.Debugf("Auth:id=%+v psw=%+v", id, psw)
+	if id == "" || psw == "" {
 		reply.Code = com.E_AgentAccountNotExist
 	}else {
 		if psw == args.Psw {
 			reply.Code = com.E_Success
-			reply.UserId = id
+			reply.Id = id
 		}else {
 			reply.Code = com.E_AgentPasswordIncorrect
 		}
@@ -153,14 +153,14 @@ func (u *User)Auth(args *User_AuthArgs, reply *User_AuthReply) (err error) {
 }
 
 type User_InfoArgs struct {
-	Account string
+	Id string
 }
 
 //test
 type User_Info struct {
-	Id       string
-	Nickname string
-	Gold     int
+	Id       string    `json:"id"`
+	Nickname string `json:"nickname"`
+	Gold     int64    `json:"gold"`
 }
 type User_InfoReply struct {
 	Code int
@@ -169,6 +169,19 @@ type User_InfoReply struct {
 
 // todo:
 func (u *User)Info(args *User_InfoArgs, reply *User_InfoReply) (err error) {
+	var nickname string
 
+	gold, _ := redis.Int64(u.c.Do("HGET", k_user_ + args.Id, k_gold))
+	nickname, _= redis.String(u.c.Do("HGET", k_user_ + args.Id, k_nickname))
+	log.Infof("gold=%+v", gold)
+	// fixme:这里用是否为空判断用户存在与否
+	if nickname == "" {
+		reply.Code = com.E_AgentAccountNotExist
+	} else {
+		reply.Code = com.E_Success
+		reply.Info.Id = args.Id
+		reply.Info.Nickname = nickname
+		reply.Info.Gold = gold
+	}
 	return
 }

@@ -36,8 +36,6 @@ func (m *model)Handle(req string) (resp string, err error) {
 		return
 	}
 
-	log.Debugf("msg: %#v", req)
-
 	switch msg.Cmd {
 	case cmdHeartbeat:
 		m.handleHeartbeat()
@@ -47,8 +45,9 @@ func (m *model)Handle(req string) (resp string, err error) {
 		resp, err = m.handleAuth(msg.Content)
 	case cmdLoginReq:
 		resp, err = m.handleLogin(msg.Content)
+	case cmdInfoReq:
+		resp, err = m.handleInfo(msg.Content)
 	}
-
 	if err != nil {
 		log.Error("handle err: ", err.Error())
 	}
@@ -103,9 +102,21 @@ func (m *model)handleLogin(content string) (resp string, err error) {
 	}
 	if reply.Code == com.E_Success {
 		//登录成功,记录用户id
-		m.id = reply.UserId
+		m.id = reply.Id
 	}
-	log.Debugf("handleLogin1, reply=%+v", reply)
 	resp = com.MakeMsgString(cmdLoginResp, reply.Code, nil)
+	return
+}
+
+func (m *model)handleInfo(content string) (resp string, err error) {
+//	args := &dao.User_InfoArgs{Id: m.id}
+	args := &dao.User_InfoArgs{Id: ""}
+	log.Debugf("handleInfo args=%+v", args)
+	var reply dao.User_InfoReply
+	if err = m.dao.Call("User.Info", args, &reply); err != nil {
+		return
+	}
+	log.Debugf("handleInfo, reply=%+v", reply)
+	resp = com.MakeMsgString(cmdInfoResp, reply.Code, nil)
 	return
 }

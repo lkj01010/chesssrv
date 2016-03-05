@@ -16,9 +16,11 @@ import (
 
 func newClient() (*websocket.Conn, error) {
 	//todo
-	client, err := net.Dial("tcp", cfg.AgentAddr())
+L:	client, err := net.Dial("tcp", cfg.AgentAddr())
 	if err != nil {
-		return nil, err
+		log.Warning("not connected to agent server, try again ...")
+		time.Sleep(1)
+		goto L
 	}
 	conn, err := websocket.NewClient(newConfig("/"), client)
 	if err != nil {
@@ -131,7 +133,7 @@ func TestServer2(t *testing.T) {
 		once.Do(startServer2)
 	}()
 
-	time.Sleep(5 * time.Second)
+//	time.Sleep(5 * time.Second)
 
 	conn, err := newClient()
 	defer conn.Close()
@@ -141,34 +143,28 @@ func TestServer2(t *testing.T) {
 		return
 	}
 
-	log.Info("test:register")
-	msg := []byte(`{"cmd":100,
-		"content":"{\"account\":\"testUtf\",\"psw\":\"pswlk22\"}"
-		}`)
+	var msg []byte
 
-//	if _, err = conn.Write(msg); err != nil {
-//		log.Error(err.Error())
-//		return
-//	}
-//	var rec string
-//	if err = websocket.Message.Receive(conn, &rec); err != nil {
-//		log.Error(err.Error())
-//		return
-//	}
+//	log.Info("test:register")
+//	msg = []byte(`{"cmd":100,
+//		"content":"{\"account\":\"testUtf\",\"psw\":\"pswlk22\"}"
+//		}`)
+//	sendMsg(conn, msg)
+//	time.Sleep(1 * time.Second)
+
+	log.Info("test:cmdLoginReq1")
+	msg = []byte(`{"cmd":104,"content":"{\"account\":\"testUtf\",\"psw\":\"pswlk22\"}"}`)
 	sendMsg(conn, msg)
 	time.Sleep(1 * time.Second)
 
-	log.Info("test:register")
-	msg = []byte(`{"cmd":104,
-				"content":"{\"account\":\"testUtf\",\"psw\":\"pswlk22\"}"}`)
+//	log.Info("test:cmdLoginReq2")
+//	msg = []byte(`{"cmd":104,"content":"{\"account\":\"testUtf\",\"psw\":\"p\"}"}`)
+//	sendMsg(conn, msg)
+//	time.Sleep(1 * time.Second)
 
+	log.Info("test:handleInfo")
+	msg = []byte(`{"cmd":106,"content":"{\"account\":\"testUtf\",\"psw\":\"p\"}"}`)
 	sendMsg(conn, msg)
-	time.Sleep(1 * time.Second)
-
-	msg = []byte(`{"cmd":104,
-				"content":"{\"account\":\"testUtf\",\"psw\":\"p\"}"}`)
-	log.Info("test:register2")
-	sendMsg(conn, msg)
-	time.Sleep(1 * time.Second)
+	time.Sleep(11 * time.Second)
 
 }

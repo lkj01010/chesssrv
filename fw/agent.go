@@ -51,6 +51,7 @@ L:	for {
 		timeout.Reset(10 * time.Second)
 		select {
 		case msg := <-session:
+			log.Debug("recv msg")
 			var resp string
 			resp, err = a.Handle(msg)
 			if err != nil {
@@ -58,7 +59,6 @@ L:	for {
 				return
 			}
 			a.Write(resp)
-			log.Debug("recv msg")
 		case <-timeout.C:
 			log.Debug("recv timeout")
 			break L
