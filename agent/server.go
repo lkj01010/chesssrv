@@ -14,8 +14,9 @@ type Server struct {
 
 	mu          sync.RWMutex
 
-	allAgents	map[*fw.Agent]interface{}
-	loginAgents map[string]*fw.Agent
+//	allAgents	map[agent]interface{}
+	//todo: 相关逻辑和操作函数
+	loginAgents map[string]*agent
 }
 
 func NewServer() (*Server, error) {
@@ -26,7 +27,7 @@ func NewServer() (*Server, error) {
 	}
 	serverInst = &Server{
 		dao: cli,
-		loginAgents: make(map[string]*fw.Agent, 0),
+		loginAgents: make(map[string]*agent, 0),
 	}
 	return serverInst, nil
 }
@@ -55,7 +56,7 @@ func (s *Server)Close() {
 	}
 }
 
-func (s *Server)AddAgent(id string, agent *fw.Agent) {
+func (s *Server)AddAgent(id string, agent *agent) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.loginAgents[id]; ok {
@@ -70,7 +71,7 @@ func (s *Server)RemoveAgent(id string){
 	defer s.mu.Unlock()
 	if agent, ok := s.loginAgents[id]; ok {
 		delete(s.loginAgents, id)
-		agent.Ctrl <- fw.CtrlRemoveAgent
+		agent.ctrl <- fw.CtrlRemoveAgent
 		log.Debugf("agent remove, agent count=%v", serverInst.AgentCount())
 	} else {
 		log.Warning("RemoveAgent: agent not exist: id=", id)
@@ -83,8 +84,9 @@ func (s *Server)AgentCount() int {
 	return len(s.loginAgents)
 }
 
-func (s *Server)Serve(rw fw.ReadWriteCloser) (err error) {
-	agent := fw.NewAgent(&model{dao: s.dao}, rw)
+func (s *Server)Serve(rwc fw.ReadWriteCloser) (err error) {
+//	agent := fw.NewAgent(&model{dao: s.dao}, rw)
+	agent := NewAgent(rwc, s.dao)
 	defer agent.Close()    // close it!
 
 	if err = agent.Serve(); err != nil {
