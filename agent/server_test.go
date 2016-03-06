@@ -168,3 +168,41 @@ func TestServer2(t *testing.T) {
 	time.Sleep(11 * time.Second)
 
 }
+
+const (
+	vv01 = iota
+	vv02
+	vv03
+	vv04
+)
+
+const (
+	tt01 = iota << 2
+	tt02
+	tt03
+	tt04
+	tt05
+	tt06
+)
+func Test3(t *testing.T){
+	log.Debug(tt01)
+	log.Debug(tt02)
+	log.Debug(tt03)
+	log.Debug(tt04)
+	log.Debug(tt05)
+	log.Debug(tt06)
+
+
+	log.Debug(tt01 >> 2)
+	log.Debug(tt02 >> 2)
+	log.Debug(tt03 >> 2)
+	log.Debug(tt04 >> 2)
+	log.Debug(tt05 >> 2)
+	log.Debug(tt06 >> 2)
+	log.Debug("---")
+
+	log.Debug(vv02+tt03)
+	log.Debug(vv02+tt04)
+	log.Debug(vv02+tt05)
+	log.Debug(vv02+tt06)
+}

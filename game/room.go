@@ -23,10 +23,19 @@ type Room struct {
 	game game
 }
 
+// useless
 func NewRoom(typ roomType) *Room {
+
 	return &Room{
 		typ: typ,
 		players: map[string]*player{},
-		game: cow.Game,
+//		game: cow.NewGame(c),
 	}
+}
+
+func (r *Room)Serve() {
+	c := make(chan string, 10)
+	game := cow.NewGame(c)
+
+	game.Serve()
 }

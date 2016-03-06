@@ -10,10 +10,12 @@ import (
 var serverInst *Server
 
 type Server struct {
-	dao    *rpc.Client
+	dao         *rpc.Client
 
-	mu     sync.RWMutex
-	agents map[string]*fw.Agent
+	mu          sync.RWMutex
+
+	allAgents	map[*fw.Agent]interface{}
+	loginAgents map[string]*fw.Agent
 }
 
 func NewServer() (*Server, error) {
@@ -24,7 +26,7 @@ func NewServer() (*Server, error) {
 	}
 	serverInst = &Server{
 		dao: cli,
-		agents: make(map[string]*fw.Agent, 0),
+		loginAgents: make(map[string]*fw.Agent, 0),
 	}
 	return serverInst, nil
 }
@@ -46,7 +48,7 @@ func (s *Server)Close() {
 	if err := s.dao.Close(); err != nil {
 		log.Error(err.Error())
 	}
-	for _, v := range s.agents {
+	for _, v := range s.loginAgents {
 		if err := v.Close(); err != nil {
 			log.Error(err.Error())
 		}
@@ -56,18 +58,18 @@ func (s *Server)Close() {
 func (s *Server)AddAgent(id string, agent *fw.Agent) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if _, ok := s.agents[id]; ok {
+	if _, ok := s.loginAgents[id]; ok {
 		log.Warning("AddAgent: agent exist: id=", id)
 	}
-	s.agents[id] = agent
+	s.loginAgents[id] = agent
 	log.Debugf("agent add, agent count=%v", serverInst.AgentCount())
 }
 
 func (s *Server)RemoveAgent(id string){
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if agent, ok := s.agents[id]; ok {
-		delete(s.agents, id)
+	if agent, ok := s.loginAgents[id]; ok {
+		delete(s.loginAgents, id)
 		agent.Ctrl <- fw.CtrlRemoveAgent
 		log.Debugf("agent remove, agent count=%v", serverInst.AgentCount())
 	} else {
@@ -78,7 +80,7 @@ func (s *Server)RemoveAgent(id string){
 func (s *Server)AgentCount() int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return len(s.agents)
+	return len(s.loginAgents)
 }
 
 func (s *Server)Serve(rw fw.ReadWriteCloser) (err error) {

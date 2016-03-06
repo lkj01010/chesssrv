@@ -13,9 +13,11 @@ import (
 //	return
 //}
 
-// 37.8 ns/op
+
+// 22.8 ns/op
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 func Randn(n int)int{
-	return rand.Intn(n)
+	return r.Intn(n)
 }
 
 //----------------------
@@ -28,5 +30,10 @@ var c uint32 = 1013904223
 func FastRand()int{
 	x0 = a * x0 + c
 	return int(x0)
+}
+// 10ns/op
+func FastRandn(n int) int {
+	x0 = a * x0 + c
+	return int(x0) % n
 }
 //]]

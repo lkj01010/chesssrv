@@ -110,7 +110,6 @@ func (m *model)handleLogin(content string) (resp string, err error) {
 
 func (m *model)handleInfo(content string) (resp string, err error) {
 	args := &dao.User_InfoArgs{Id: m.id}
-//	args := &dao.User_InfoArgs{Id: ""}
 	log.Debugf("handleInfo args=%+v", args)
 	var reply dao.User_InfoReply
 	if err = m.dao.Call("User.Info", args, &reply); err != nil {

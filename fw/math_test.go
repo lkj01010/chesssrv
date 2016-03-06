@@ -17,7 +17,11 @@ func BenchmarkFastRand(b *testing.B) {
 		FastRand()
 	}
 }
-
+func BenchmarkFastRandn(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		FastRandn(100)
+	}
+}
 func BenchmarkRandlibRand(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Randn(1000000)

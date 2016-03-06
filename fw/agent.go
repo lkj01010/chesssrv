@@ -59,6 +59,7 @@ L:	for {
 				return
 			}
 			a.Write(resp)
+
 		case <-timeout.C:
 			log.Debug("recv timeout")
 			break L
