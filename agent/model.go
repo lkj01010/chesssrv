@@ -6,6 +6,8 @@ import (
 	log "github.com/lkj01010/log"
 	"net/rpc"
 	"chess/fw"
+	"errors"
+	"fmt"
 )
 
 //数据处理模块
@@ -44,7 +46,17 @@ func (m *model)Exit() {
 func (m *model)Handle(req string) (resp string, err error) {
 	var msg com.Msg
 	if err = json.Unmarshal([]byte(req), &msg); err != nil {
-		log.Error("Unmarshal err: ", err)
+//		log.Error("Unmarshal err: ", err)
+		return
+	}
+
+	if m.isLogin == false &&
+	(msg.Cmd != CmdHeartbeat &&
+	msg.Cmd != CmdRegisterReq &&
+	msg.Cmd != CmdAuthReq &&
+	msg.Cmd != CmdLoginReq) {
+		e := fmt.Sprintf("Handle:not allowed withou LOGIN:cmd=%+v", msg.Cmd)
+		err = errors.New(e)
 		return
 	}
 
@@ -59,10 +71,11 @@ func (m *model)Handle(req string) (resp string, err error) {
 		resp, err = m.handleLogin(msg.Content)
 	case CmdInfoReq:
 		resp, err = m.handleInfo(msg.Content)
+
+	case CmdToGameReq:
+		resp, err = m.handleToGame(msg.Content)
 	}
-	if err != nil {
-		log.Error("handle err: ", err.Error())
-	}
+
 	return
 }
 func (m *model)handleHeartbeat() {
@@ -115,6 +128,7 @@ func (m *model)handleLogin(content string) (resp string, err error) {
 	if reply.Code == com.E_Success {
 		//登录成功,记录用户id
 		m.id = reply.Id
+		m.isLogin = true
 		serverInst.AddAgent(m.id, m.agent)
 	}
 	resp = com.MakeMsgString(CmdLoginResp, reply.Code, nil)
@@ -130,5 +144,11 @@ func (m *model)handleInfo(content string) (resp string, err error) {
 	}
 	log.Debugf("handleInfo, reply=%+v", reply)
 	resp = com.MakeMsgString(CmdInfoResp, reply.Code, reply.Info)
+	return
+}
+
+func (m *model)handleToGame(content string) (resp string, err error) {
+	//	args := &
+	// todo:0308
 	return
 }

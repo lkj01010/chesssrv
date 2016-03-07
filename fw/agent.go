@@ -31,6 +31,8 @@ func NewAgent(h Model, rw ReadWriteCloser) *Agent {
 
 func (a *Agent)Serve() (err error) {
 	a.Enter()
+	defer a.Exit()
+
 	session := make(chan string, 5)
 	go func(c chan string) {
 		var buf string
@@ -82,8 +84,6 @@ func (a *Agent)Serve() (err error) {
 	//		return
 	//	}
 	//	a.Write(resp)
-
-	a.Exit()
 
 	return
 }

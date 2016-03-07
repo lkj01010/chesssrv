@@ -1,12 +1,11 @@
 package cow
 import (
 	"time"
-	"github.com/lkj01010/log
+	"github.com/lkj01010/log"
 )
 
 type DaoCtrl interface {
 	AddCoin(id int, coin int)
-
 }
 
 type gameState int
@@ -21,15 +20,15 @@ type Game struct {
 	DaoCtrl
 	c       chan string
 	state   gameState
-	players []player
+	players []*player
 	timer   *time.Timer
 }
 
 func NewGame(c chan string) *Game {
 	return &Game{
 		c: c,
-		players: make([]player, 0, maxPlayer),
-		timer: &time.NewTimer(0),
+		players: make([]*player, 0, maxPlayer),
+		timer: time.NewTimer(0),
 	}
 }
 
@@ -45,7 +44,7 @@ func (g *Game)Serve() {
 }
 
 func (g *Game)PlayerEnter(c chan string, id string, coin int) {
-	append(g.players, NewPlayer(c, id, coin))
+	g.players = append(g.players, NewPlayer(c, id, coin))
 }
 
 func (g *Game)NewRound() {

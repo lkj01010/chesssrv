@@ -6,15 +6,10 @@ import (
 
 // player
 type player struct {
-	cmdChan chan string
+	cmd chan string
 }
 
 // room
-type roomType int
-const (
-	roomType_0 roomType = iota
-)
-
 type Room struct {
 	typ roomType
 

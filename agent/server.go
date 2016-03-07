@@ -5,12 +5,14 @@ import (
 	"net/rpc"
 	"chess/cfg"
 	"sync"
+	"time"
 )
 
 var serverInst *Server
 
 type Server struct {
 	dao         *rpc.Client
+	game        *rpc.Client
 
 	mu          sync.RWMutex
 
@@ -20,13 +22,25 @@ type Server struct {
 }
 
 func NewServer() (*Server, error) {
-	cli, err := rpc.Dial("tcp", cfg.DaoAddr())
+	// connect dao server
+	dao:    daocli, err := rpc.Dial("tcp", cfg.DaoAddr())
 	if err != nil {
-		log.Error("dao client create err=", err.Error())
-		return nil, err
+		log.Warningf("dao server connect fail(err=%+v), try again...", err.Error())
+		time.Sleep(1 * time.Second)
+		goto dao
 	}
+
+	// connect game server
+	game:	gamecli, err := rpc.Dial("tcp", cfg.GameAddr())
+	if err != nil {
+		log.Warningf("game server connect failed(err=%+v), try again...", err.Error())
+		goto game
+	}
+
+	// new server
 	serverInst = &Server{
-		dao: cli,
+		dao: daocli,
+		game: gamecli,
 		loginAgents: make(map[string]*fw.Agent, 0),
 	}
 	return serverInst, nil
@@ -88,7 +102,7 @@ func (s *Server)AgentCount() int {
 
 func (s *Server)Serve(rwc fw.ReadWriteCloser) (err error) {
 	agent := fw.NewAgent(&model{dao: s.dao}, rwc)
-//	agent := NewAgent(rwc, s.dao)
+	//	agent := NewAgent(rwc, s.dao)
 	defer agent.Close()    // close it!
 
 	if err = agent.Serve(); err != nil {
