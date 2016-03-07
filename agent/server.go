@@ -16,7 +16,7 @@ type Server struct {
 
 	//	allAgents	map[agent]interface{}
 	//todo: 相关逻辑和操作函数
-	loginAgents map[string]*agent
+	loginAgents map[string]*fw.Agent
 }
 
 func NewServer() (*Server, error) {
@@ -27,7 +27,7 @@ func NewServer() (*Server, error) {
 	}
 	serverInst = &Server{
 		dao: cli,
-		loginAgents: make(map[string]*agent, 0),
+		loginAgents: make(map[string]*fw.Agent, 0),
 	}
 	return serverInst, nil
 }
@@ -56,7 +56,7 @@ func (s *Server)Close() {
 	}
 }
 
-func (s *Server)AddAgent(id string, agent *agent) {
+func (s *Server)AddAgent(id string, agent *fw.Agent) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -87,8 +87,8 @@ func (s *Server)AgentCount() int {
 }
 
 func (s *Server)Serve(rwc fw.ReadWriteCloser) (err error) {
-	//	agent := fw.NewAgent(&model{dao: s.dao}, rw)
-	agent := NewAgent(rwc, s.dao)
+	agent := fw.NewAgent(&model{dao: s.dao}, rwc)
+//	agent := NewAgent(rwc, s.dao)
 	defer agent.Close()    // close it!
 
 	if err = agent.Serve(); err != nil {

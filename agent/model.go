@@ -5,14 +5,18 @@ import (
 	"chess/dao"
 	log "github.com/lkj01010/log"
 	"net/rpc"
+	"chess/fw"
 )
 
 //数据处理模块
 type model struct {
-	dao *rpc.Client
+	dao     *rpc.Client
+
+	agent   *fw.Agent
 
 	// 登录成功后赋值.通过是否为""判断是否登录
-	id  string
+	id      string
+	isLogin bool
 }
 
 //func NewModel(dao *rpc.Client, isTimeout bool) *model {
@@ -22,11 +26,19 @@ type model struct {
 //	return m
 //}
 
+func (m *model)Hook(a *fw.Agent) {
+	m.agent = a
+}
+
 func (m *model)Enter() {
+	m.isLogin = false
 	m.id = ""
 }
 
 func (m *model)Exit() {
+	if m.isLogin {
+		serverInst.RemoveAgent(m.id)
+	}
 }
 
 func (m *model)Handle(req string) (resp string, err error) {
@@ -103,6 +115,7 @@ func (m *model)handleLogin(content string) (resp string, err error) {
 	if reply.Code == com.E_Success {
 		//登录成功,记录用户id
 		m.id = reply.Id
+		serverInst.AddAgent(m.id, m.agent)
 	}
 	resp = com.MakeMsgString(CmdLoginResp, reply.Code, nil)
 	return

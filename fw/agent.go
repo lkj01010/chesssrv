@@ -12,7 +12,7 @@ type Model interface {
 	Enter()
 	Handle(req string) (resp string, err error)
 	Exit()
-//	SetAgent(* Agent)
+	Hook(*Agent)
 }
 
 type Agent struct {
@@ -22,14 +22,16 @@ type Agent struct {
 }
 
 func NewAgent(h Model, rw ReadWriteCloser) *Agent {
-	return &Agent{h, rw, make(chan string, 0)}
+	a := &Agent{h, rw, make(chan string, 2)}
+	h.Hook(a)
+	return a
 	// todo: modify agent to 2 as above this
-//	a := &Agent{h, rw, make(chan string, 0)}
+
 }
 
 func (a *Agent)Serve() (err error) {
 	a.Enter()
-	session := make(chan string, 0)
+	session := make(chan string, 5)
 	go func(c chan string) {
 		var buf string
 		for {
@@ -39,12 +41,12 @@ func (a *Agent)Serve() (err error) {
 				log.Debug("agent read: ", err.Error())
 				return
 			}
-			c <-buf
+			c <- buf
 		}
 	}(session)
 
 	timeout := time.NewTimer(0)
-L:	for {
+	L:    for {
 		timeout.Reset(10 * time.Second)
 		select {
 		case msg := <-session:
