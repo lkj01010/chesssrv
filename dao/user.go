@@ -112,9 +112,9 @@ func (u *User)Auth(args *User_AuthArgs, reply *User_AuthReply) (err error) {
 	//	exists, _ := redis.Bool(u.c.Do("EXISTS", accountkey))
 
 	var id string
+	log.Debugf("Auth:get %+v", accountkey)
 	id, _ = redis.String(u.c.Do("GET", accountkey))
 	// id may be ""
-	log.Debugf("Auth:id=%+v", id)
 	psw, _ := redis.String(u.c.Do("HGET", k_user_ + id, k_psw))
 	//	if id == "" {
 	//		reply.Code = com.E_AgentAccountNotExist

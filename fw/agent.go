@@ -8,16 +8,11 @@ const (
 	CtrlRemoveAgent = "removeAgent"
 )
 
-type ReadWriteCloser interface {
-	Read(msg *string) error
-	Write(msg string) error
-	Close() error
-}
-
 type Model interface {
 	Enter()
 	Handle(req string) (resp string, err error)
 	Exit()
+//	SetAgent(* Agent)
 }
 
 type Agent struct {
@@ -28,6 +23,8 @@ type Agent struct {
 
 func NewAgent(h Model, rw ReadWriteCloser) *Agent {
 	return &Agent{h, rw, make(chan string, 0)}
+	// todo: modify agent to 2 as above this
+//	a := &Agent{h, rw, make(chan string, 0)}
 }
 
 func (a *Agent)Serve() (err error) {

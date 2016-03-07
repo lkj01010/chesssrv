@@ -56,8 +56,13 @@ func (a *agent)Serve() (err error) {
 	L:    for {
 		timeout.Reset(10 * time.Second)
 		select {
+		case ctrl := <-a.ctrl:
+			if ctrl == CtrlRemoveAgent {
+				log.Debug("recv ctrl: CtrlRemoveAgent")
+				break L
+			}
+
 		case msg := <-session:
-			log.Debug("recv msg")
 			var resp string
 			resp, err = a.handle(msg)
 			if err != nil {
@@ -69,11 +74,6 @@ func (a *agent)Serve() (err error) {
 		case <-timeout.C:
 			log.Debug("recv timeout")
 			break L
-		case ctrl := <-a.ctrl:
-			if ctrl == CtrlRemoveAgent {
-				log.Debug("recv ctrl: CtrlRemoveAgent")
-				break L
-			}
 		}
 	}
 
@@ -100,15 +100,15 @@ func (a *agent)handle(req string) (resp string, err error) {
 	}
 
 	switch msg.Cmd {
-	case cmdHeartbeat:
+	case CmdHeartbeat:
 		a.handleHeartbeat()
-	case cmdRegisterReq:
+	case CmdRegisterReq:
 		resp, err = a.handleRegister(msg.Content)
-	case cmdAuthReq:
+	case CmdAuthReq:
 		resp, err = a.handleAuth(msg.Content)
-	case cmdLoginReq:
+	case CmdLoginReq:
 		resp, err = a.handleLogin(msg.Content)
-	case cmdInfoReq:
+	case CmdInfoReq:
 		resp, err = a.handleInfo(msg.Content)
 	}
 	if err != nil {
@@ -135,7 +135,7 @@ func (a *agent)handleRegister(content string) (resp string, err error) {
 		return
 	}
 	log.Infof("User.Register %+v -> %+v", args, reply)
-	resp = com.MakeMsgString(cmdRegisterResp, reply.Code, nil)
+	resp = com.MakeMsgString(CmdRegisterResp, reply.Code, nil)
 	return
 }
 
@@ -149,7 +149,7 @@ func (a *agent)handleAuth(content string) (resp string, err error) {
 	if err = a.dao.Call("User.Auth", args, &reply); err != nil {
 		return
 	}
-	resp = com.MakeMsgString(cmdAuthResp, reply.Code, nil)
+	resp = com.MakeMsgString(CmdAuthResp, reply.Code, nil)
 	return
 }
 
@@ -158,18 +158,20 @@ func (a *agent)handleLogin(content string) (resp string, err error) {
 	if err = json.Unmarshal([]byte(content), &req); err != nil {
 		return
 	}
+	log.Infof("handleLogin, req=%+v", req)
 	args := &dao.User_AuthArgs{req.Account, req.Psw}
 	var reply dao.User_AuthReply
 	if err = a.dao.Call("User.Auth", args, &reply); err != nil {
 		return
 	}
+	log.Infof("handleLogin, reply=%+v", reply)
 	if reply.Code == com.E_Success {
 		//登录成功,记录用户id
 		a.id = reply.Id
 		// 记录到server
 		serverInst.AddAgent(a.id, a)
 	}
-	resp = com.MakeMsgString(cmdLoginResp, reply.Code, nil)
+	resp = com.MakeMsgString(CmdLoginResp, reply.Code, nil)
 	return
 }
 
@@ -181,6 +183,6 @@ func (a *agent)handleInfo(content string) (resp string, err error) {
 		return
 	}
 	log.Debugf("handleInfo, reply=%+v", reply)
-	resp = com.MakeMsgString(cmdInfoResp, reply.Code, reply.Info)
+	resp = com.MakeMsgString(CmdInfoResp, reply.Code, reply.Info)
 	return
 }

@@ -22,7 +22,7 @@ L:	client, err := net.Dial("tcp", cfg.AgentAddr())
 		time.Sleep(1)
 		goto L
 	}
-	conn, err := websocket.NewClient(newConfig("/"), client)
+	conn, err := websocket.NewClient(newConfig_("/"), client)
 	if err != nil {
 		log.Errorf("WebSocket handshake error: %v", err)
 		return nil, err
@@ -86,7 +86,8 @@ var (
 	once sync.Once
 )
 
-func newConfig(path string) *websocket.Config {
+func newConfig_(path string) *websocket.Config {
+	log.Infof("serverAddr=%+v, path=%+v", serverAddr, path)
 	config, _ := websocket.NewConfig(fmt.Sprintf("ws://%s%s", serverAddr, path), "http://localhost")
 	return config
 }
@@ -100,7 +101,7 @@ func TestServer1(t *testing.T) {
 		t.Fatal("dialing", err)
 	}
 	log.Info("t=%v", t)
-	conn, err := websocket.NewClient(newConfig("/agent"), client)
+	conn, err := websocket.NewClient(newConfig_("/agent"), client)
 	if err != nil {
 		t.Errorf("WebSocket handshake error: %v", err)
 		return
@@ -166,6 +167,11 @@ func TestServer2(t *testing.T) {
 	msg = []byte(`{"cmd":106,"content":"{\"account\":\"testUtf\",\"psw\":\"p\"}"}`)
 	sendMsg(conn, msg)
 	time.Sleep(11 * time.Second)
+
+}
+
+func TestServer3(t *testing.T) {
+
 
 }
 

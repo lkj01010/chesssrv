@@ -4,6 +4,12 @@ import (
 	"github.com/lkj01010/log"
 )
 
+type ReadWriteCloser interface {
+	Read(msg *string) error
+	Write(msg string) error
+	Close() error
+}
+
 type WsClient struct {
 	ws *websocket.Conn
 }

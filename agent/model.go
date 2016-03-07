@@ -37,15 +37,15 @@ func (m *model)Handle(req string) (resp string, err error) {
 	}
 
 	switch msg.Cmd {
-	case cmdHeartbeat:
+	case CmdHeartbeat:
 		m.handleHeartbeat()
-	case cmdRegisterReq:
+	case CmdRegisterReq:
 		resp, err = m.handleRegister(msg.Content)
-	case cmdAuthReq:
+	case CmdAuthReq:
 		resp, err = m.handleAuth(msg.Content)
-	case cmdLoginReq:
+	case CmdLoginReq:
 		resp, err = m.handleLogin(msg.Content)
-	case cmdInfoReq:
+	case CmdInfoReq:
 		resp, err = m.handleInfo(msg.Content)
 	}
 	if err != nil {
@@ -72,7 +72,7 @@ func (m *model)handleRegister(content string) (resp string, err error) {
 		return
 	}
 	log.Infof("User.Register %+v -> %+v", args, reply)
-	resp = com.MakeMsgString(cmdRegisterResp, reply.Code, nil)
+	resp = com.MakeMsgString(CmdRegisterResp, reply.Code, nil)
 	return
 }
 
@@ -86,7 +86,7 @@ func (m *model)handleAuth(content string) (resp string, err error) {
 	if err = m.dao.Call("User.Auth", args, &reply); err != nil {
 		return
 	}
-	resp = com.MakeMsgString(cmdAuthResp, reply.Code, nil)
+	resp = com.MakeMsgString(CmdAuthResp, reply.Code, nil)
 	return
 }
 
@@ -104,7 +104,7 @@ func (m *model)handleLogin(content string) (resp string, err error) {
 		//登录成功,记录用户id
 		m.id = reply.Id
 	}
-	resp = com.MakeMsgString(cmdLoginResp, reply.Code, nil)
+	resp = com.MakeMsgString(CmdLoginResp, reply.Code, nil)
 	return
 }
 
@@ -116,6 +116,6 @@ func (m *model)handleInfo(content string) (resp string, err error) {
 		return
 	}
 	log.Debugf("handleInfo, reply=%+v", reply)
-	resp = com.MakeMsgString(cmdInfoResp, reply.Code, reply.Info)
+	resp = com.MakeMsgString(CmdInfoResp, reply.Code, reply.Info)
 	return
 }

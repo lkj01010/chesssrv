@@ -3,37 +3,37 @@ import (
 )
 
 const (
-	cmdHeartbeat = 10
-	cmdRegisterReq = 100
-	cmdRegisterResp = 101
+	CmdHeartbeat = 10
+	CmdRegisterReq = 100
+	CmdRegisterResp = 101
 
-	cmdAuthReq = 102
-	cmdAuthResp = 103
-	cmdLoginReq = 104
-	cmdLoginResp = 105
-	cmdInfoReq = 106
-	cmdInfoResp = 107
+	CmdAuthReq = 102
+	CmdAuthResp = 103
+	CmdLoginReq = 104
+	CmdLoginResp = 105
+	CmdInfoReq = 106
+	CmdInfoResp = 107
 
-	cmdToLobbyReq = 200
-	cmdToLobbyResp = 201
+	CmdToLobbyReq = 200
+	CmdToLobbyResp = 201
 
-	cmdToGameReq = 202
-	cmdToGameResp = 203
+	CmdToGameReq = 202
+	CmdToGameResp = 203
 )
 
 var cmdText = &map[int]string{
-	cmdHeartbeat:	"heartbeat",
-	cmdRegisterReq:    "registerReq",
-	cmdRegisterResp:    "registerResp",
-	cmdAuthReq:    "authReq",
-	cmdAuthResp:    "authResp",
-	cmdLoginReq:    "loginReq",
-	cmdLoginResp:    "loginResp",
+	CmdHeartbeat:	"heartbeat",
+	CmdRegisterReq:    "registerReq",
+	CmdRegisterResp:    "registerResp",
+	CmdAuthReq:    "authReq",
+	CmdAuthResp:    "authResp",
+	CmdLoginReq:    "loginReq",
+	CmdLoginResp:    "loginResp",
 
-	cmdToLobbyReq:    "toLobbyReq",
-	cmdToLobbyResp:    "toLobbyResp",
-	cmdToGameReq:    "toGameReq",
-	cmdToGameResp:    "toGameResp",
+	CmdToLobbyReq:    "toLobbyReq",
+	CmdToLobbyResp:    "toLobbyResp",
+	CmdToGameReq:    "toGameReq",
+	CmdToGameResp:    "toGameResp",
 }
 
 //var loginMethodCodes map[string]int
