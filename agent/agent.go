@@ -21,8 +21,8 @@ type ReadWriteCloser interface {
 type agent struct {
 	ReadWriteCloser
 	ctrl chan string
-
 	dao  *rpc.Client
+
 	// 登录成功后赋值.通过是否为""判断是否登录
 	id   string
 }
@@ -30,7 +30,7 @@ type agent struct {
 func NewAgent(rwc ReadWriteCloser, dao *rpc.Client) *agent {
 	return &agent{
 		ReadWriteCloser: rwc,
-		ctrl: make(chan string, 0),
+		ctrl: make(chan string, 10),
 		dao: dao,
 		id: "",
 	}
@@ -38,7 +38,7 @@ func NewAgent(rwc ReadWriteCloser, dao *rpc.Client) *agent {
 
 func (a *agent)Serve() (err error) {
 	a.enter()
-	session := make(chan string, 0)
+	session := make(chan string, 1)
 	go func(c chan string) {
 		var buf string
 		for {
@@ -87,7 +87,9 @@ func (a *agent)enter() {
 }
 
 func (a *agent)exit() {
-
+	if a.id != "" {
+		serverInst.RemoveAgent(a.id)
+	}
 }
 
 func (a *agent)handle(req string) (resp string, err error) {
@@ -164,6 +166,8 @@ func (a *agent)handleLogin(content string) (resp string, err error) {
 	if reply.Code == com.E_Success {
 		//登录成功,记录用户id
 		a.id = reply.Id
+		// 记录到server
+		serverInst.AddAgent(a.id, a)
 	}
 	resp = com.MakeMsgString(cmdLoginResp, reply.Code, nil)
 	return

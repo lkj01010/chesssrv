@@ -14,7 +14,7 @@ type Server struct {
 
 	mu          sync.RWMutex
 
-//	allAgents	map[agent]interface{}
+	//	allAgents	map[agent]interface{}
 	//todo: 相关逻辑和操作函数
 	loginAgents map[string]*agent
 }
@@ -32,18 +32,18 @@ func NewServer() (*Server, error) {
 	return serverInst, nil
 }
 
-func GetServer() *Server {
-	if serverInst != nil {
-		return serverInst
-	} else {
-		var err error
-		serverInst, err = NewServer()
-		if err != nil {
-			log.Panic("new server error: ", err.Error())
-		}
-	}
-	return serverInst
-}
+//func GetServer() *Server {
+//	if serverInst != nil {
+//		return serverInst
+//	} else {
+//		var err error
+//		serverInst, err = NewServer()
+//		if err != nil {
+//			log.Panic("new server error: ", err.Error())
+//		}
+//	}
+//	return serverInst
+//}
 
 func (s *Server)Close() {
 	if err := s.dao.Close(); err != nil {
@@ -59,20 +59,21 @@ func (s *Server)Close() {
 func (s *Server)AddAgent(id string, agent *agent) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
 	if _, ok := s.loginAgents[id]; ok {
 		log.Warning("AddAgent: agent exist: id=", id)
 	}
 	s.loginAgents[id] = agent
-	log.Debugf("agent add, agent count=%v", serverInst.AgentCount())
+	log.Debugf("agent add, agent count=%v", len(s.loginAgents))
 }
 
-func (s *Server)RemoveAgent(id string){
+func (s *Server)RemoveAgent(id string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if agent, ok := s.loginAgents[id]; ok {
+
+	if _, ok := s.loginAgents[id]; ok {
 		delete(s.loginAgents, id)
-		agent.ctrl <- fw.CtrlRemoveAgent
-		log.Debugf("agent remove, agent count=%v", serverInst.AgentCount())
+		log.Debugf("agent remove, agent count=%v", len(s.loginAgents))
 	} else {
 		log.Warning("RemoveAgent: agent not exist: id=", id)
 	}
@@ -81,11 +82,12 @@ func (s *Server)RemoveAgent(id string){
 func (s *Server)AgentCount() int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
+
 	return len(s.loginAgents)
 }
 
 func (s *Server)Serve(rwc fw.ReadWriteCloser) (err error) {
-//	agent := fw.NewAgent(&model{dao: s.dao}, rw)
+	//	agent := fw.NewAgent(&model{dao: s.dao}, rw)
 	agent := NewAgent(rwc, s.dao)
 	defer agent.Close()    // close it!
 
