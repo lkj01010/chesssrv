@@ -24,4 +24,6 @@ func main() {
 	}
 	log.Info("dao RPC server listening on ", serverAddr)
 	rpc.Accept(l)
+
+	// todo: replace rpc to tcp
 }

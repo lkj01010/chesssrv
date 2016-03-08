@@ -3,14 +3,14 @@ import "encoding/json"
 
 type Msg struct {
 	Cmd     int `json:"cmd"`
-	Code	int `json:"code"`
+	Param   int `json:"param"`
 	Content string `json:"content"`
 }
 
-func MakeMsgString(cmd int, code int, content interface{}) (resp string) {
+func MakeMsgString(cmd int, param int, content interface{}) (resp string) {
 	var msg Msg
 	msg.Cmd = cmd
-	msg.Code = code
+	msg.Param = param
 
 	if content != nil {
 		c, _ := json.Marshal(content)

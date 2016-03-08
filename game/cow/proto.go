@@ -7,6 +7,8 @@ const (
 	Cmd_Cow_CardTypeShowNtf = 3511
 	Cmd_Cow_SettleNtf = 3522
 
-	Cmd_Cow_End = 3599
+	Cmd_Cow_NotEnoughMoneyNtf = 3702
+
+	Cmd_Cow_End = 3999
 )
 

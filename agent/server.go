@@ -17,7 +17,6 @@ type Server struct {
 	mu          sync.RWMutex
 
 	//	allAgents	map[agent]interface{}
-	//todo: 相关逻辑和操作函数
 	loginAgents map[string]*fw.Agent
 }
 
@@ -41,7 +40,7 @@ func NewServer() (*Server, error) {
 	serverInst = &Server{
 		dao: daocli,
 		game: gamecli,
-		loginAgents: make(map[string]*fw.Agent, 0),
+		loginAgents: make(map[string]*fw.Agent, 100),
 	}
 	return serverInst, nil
 }

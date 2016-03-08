@@ -1,9 +1,11 @@
 package game
 
-type roomType int
+type RoomType int
 const (
-	roomType_0 roomType = iota
-	roomType_1
-	roomType_2
-	roomTypeCount
+	RoomType_0 RoomType = iota
+	RoomType_1
+	RoomType_2
+	RoomTypeCount
 )
+
+var RoomEnterCoin = [RoomTypeCount]int{200, 300, 400}

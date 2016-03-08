@@ -4,6 +4,7 @@ import (
 	"github.com/lkj01010/log"
 	"chess/cfg"
 	"time"
+	"chess/game/cow"
 )
 
 // 封装一层是因为直接调用Server做rpc导出类,它有Close这个函数,不符合rpc类规范,报警告
@@ -21,9 +22,16 @@ func (m *Model)Exit() {
 
 ///////////////////////////////////////////////////////
 type Server struct {
-	dao   *rpc.Client
+	dao         *rpc.Client
 
-	rooms [][]*Room
+	// 房间id counter
+	roomId      int
+	// 房间
+	games       map[int]*cow.Game
+	// 玩家（id） 对应其进入的game
+	playerGames map[string]*cow.Game
+	// 每个type一个数组
+	freeGames   [][]*cow.Game
 }
 
 func NewServer() *Server {
@@ -39,12 +47,15 @@ func NewServer() *Server {
 
 	s.dao = daocli
 
-	// 1000 rooms each type
-	s.rooms = make([][]*Room, roomTypeCount)
-	for i, _ := range (s.rooms) {
-		s.rooms[i] = make([]*Room, 1000)
+	// data init
+	s.roomId = 0
+	s.games = map[int]*cow.Game{}
+	s.playerGames = map[string]*cow.Game{}
+	s.freeGames = [][]*cow.Game{}
+	// 1000 games each type
+	for i, _ := range (s.freeGames) {
+		s.games[i] = make([]*cow.Game)
 	}
-	//	s.rooms = make(make([]*Room, 0, 1000), roomTypeCount)
 
 	return s
 }

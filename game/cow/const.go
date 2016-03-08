@@ -1,4 +1,5 @@
 package cow
+import "time"
 
 const cardLen = 5	// 一副牌
 
@@ -123,10 +124,15 @@ const (
 )
 
 // max player in a game
-const maxPlayer = 5
+const maxPlayer = 6
 
+// 等待到发牌
+const timeout_deal = 15 * time.Second
 // 发牌后到结算之间的时间
-const timeout_settle = 15
+const timeout_settle = 15 * time.Second
+// 结算到新局的时间
+const timeout_newrount = 5 * time.Second
+
 //打扑克牌用到的英语
 //card games 打牌
 //cards 纸牌

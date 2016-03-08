@@ -2,31 +2,34 @@ package cow
 import (
 	"time"
 	"github.com/lkj01010/log"
+	"chess/game"
 )
 
 type DaoCtrl interface {
-	AddCoin(id int, coin int)
+	AddCoin(id string, coin int)
+	GetCoin(id []string) []int
 }
 
 type gameState int
 const (
 	gsWait gameState = iota    // 发牌
 	gsDeal
-	gsPlay
 	gsSettle    // 结算
 )
 
 type Game struct {
 	DaoCtrl
-	c       chan string
-	state   gameState
-	players []*player
-	timer   *time.Timer
+	c        chan string
+	roomType game.RoomType
+	state    gameState
+	players  []*player
+	timer    *time.Timer
 }
 
-func NewGame(c chan string) *Game {
+func NewGame(c chan string, rt game.RoomType) *Game {
 	return &Game{
 		c: c,
+		roomType: rt,
 		players: make([]*player, 0, maxPlayer),
 		timer: time.NewTimer(0),
 	}
@@ -43,25 +46,55 @@ func (g *Game)Serve() {
 	}
 }
 
-func (g *Game)PlayerEnter(c chan string, id string, coin int) {
-	g.players = append(g.players, NewPlayer(c, id, coin))
-}
-
-func (g *Game)NewRound() {
-	g.Deal()
-	g.timer.Reset(timeout_settle)
-}
-
-func (g* Game)Deal() {
-	for _, player := range (g.players) {
-		DealCards(player.cards)
-	}
-}
-
-func (g *Game)Settle() {
-
+func (g *Game)PlayerEnter(id string, coin int) {
+	g.players = append(g.players, NewPlayer(id, coin))
 }
 
 func (g *Game)onTimer() {
+	switch g.state {
+	case gsWait:
+		g.Deal()
+	case gsDeal:
+		g.settle()
+	case gsSettle:
+		g.NewRound()
+	}
+}
 
+func (g *Game)NewRound() {
+	g.state = gsWait
+	// 检查每个玩家钱是否足够
+	g.checkCoinEnough()
+	// 等待玩家准备就绪
+	g.timer.Reset(timeout_deal)
+}
+
+func (g* Game)Deal() {
+	g.state = gsDeal
+	for _, player := range (g.players) {
+		DealCards(player.cards)
+	}
+	g.c
+	g.timer.Reset(timeout_settle)
+}
+
+func (g *Game)checkCoinEnough() {
+	ids := []string{}
+	for _, player := range (g.players) {
+		if (player.state == psPlay) {
+			ids = append(ids, player.id)
+		}
+	}
+	playerCoinArray := &g.DaoCtrl.GetCoin(ids)
+
+	for _, coin := range (playerCoinArray) {
+		if coin < game.RoomEnterCoin[g.roomType] {
+			// 没有足够的钱玩
+			g.c <- msgcInst.hasNoEnoughMoney(player.id)
+		}
+	}
+}
+
+func (g *Game)settle() {
+	g.timer.Reset(timeout_newrount)
 }

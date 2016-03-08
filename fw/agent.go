@@ -25,8 +25,6 @@ func NewAgent(h Model, rw ReadWriteCloser) *Agent {
 	a := &Agent{h, rw, make(chan string, 2)}
 	h.Hook(a)
 	return a
-	// todo: modify agent to 2 as above this
-
 }
 
 func (a *Agent)Serve() (err error) {
