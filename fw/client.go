@@ -9,15 +9,19 @@ import (
 	"fmt"
 )
 
+const (
+	ClientReturn = "ClientReturn"
+)
+
 type ClientModel interface {
-	Step(output *string)
 	Handle(req string) (err error)
 }
 
 type Client struct {
 	ReadWriteCloser
 	ClientModel
-	cmd chan string
+	send chan string
+	ctrl chan string
 }
 
 func newConfig(path string) *websocket.Config {
@@ -25,7 +29,7 @@ func newConfig(path string) *websocket.Config {
 	return config
 }
 
-func NewClient(addr string, m ClientModel) (*Client, error) {
+func NewClient(addr string, m ClientModel, out chan string) (*Client, error) {
 	L:    client, err := net.Dial("tcp", cfg.AgentAddr())
 	if err != nil {
 		log.Warning("not connected to agent server, try again ...")
@@ -41,31 +45,23 @@ func NewClient(addr string, m ClientModel) (*Client, error) {
 	return &Client{
 		ReadWriteCloser: rwc,
 		ClientModel: m,
-		cmd: make(chan string, 5),
+		send: make(chan string, 10),
+		ctrl: out,
 	}, nil
 }
 
-//func (c *Client)SendMsg(msg string) (err error) {
-//	if _, err = c.Write(msg); err != nil {
-//		log.Error(err.Error())
-//		return
-//	}
-//	var rec string
-//	if err = c.Read(&rec); err != nil {
-//		log.Error(err.Error())
-//		return
-//	}
-//	return
-//}
-
 func (c *Client)Loop() (err error) {
+	defer func() {
+		c.ctrl <- ClientReturn
+	}()
+
 	session := make(chan string, 1)
 	go func(ch chan string) {
 		var buf string
 		for {
 			err = c.Read(&buf)
 			if err != nil {
-				log.Debug("client read: ", err.Error())
+				log.Error("client read failed: ", err.Error())
 				return
 			}
 			ch <- buf
@@ -73,19 +69,21 @@ func (c *Client)Loop() (err error) {
 	}(session)
 
 	for {
-		var output string
-		c.Step(&output)
-		c.Write(output)
-
 		select {
-		case cmd := <-c.cmd:
+		case cmd := <-c.ctrl:
 			if cmd == CtrlRemoveAgent {
 				return
 			}
 		case msg := <-session:
 			err = c.Handle(msg)
 			if err != nil {
-				log.Error("agent session: ", err.Error())
+				log.Error("client handle failed: ", err.Error())
+				return
+			}
+		case msg := <-c.send:
+			if err = c.Write(msg); err != nil {
+				// 写错误
+				log.Error("client write failed: ", err.Error())
 				return
 			}
 		}
@@ -93,7 +91,11 @@ func (c *Client)Loop() (err error) {
 }
 
 func (c *Client)Cmd(cmd string) {
-	c.cmd <- cmd
+	c.ctrl <- cmd
+}
+
+func (c *Client)Send(msg string) {
+	c.send <- msg
 }
 
 //func (c *Client)Step() {

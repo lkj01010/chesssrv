@@ -1,4 +1,8 @@
 package cow
+import (
+	"encoding/json"
+	"chess/com"
+)
 
 const (
 	Cmd_Cow_Start = 3500
@@ -11,4 +15,18 @@ const (
 
 	Cmd_Cow_End = 3999
 )
+
+type Msg struct {
+	Id  string `json:"id"`
+//	Msg com.Msg `json:"msg"`
+	Content string `json:"content"`
+}
+
+func MakeMsgString(id string, cmd int, param int, content interface{}) (resp string) {
+	var msg Msg
+	msg.Id = id
+	msg.Content = com.MakeMsgString(cmd, param, content)
+	r, _ := json.Marshal(msg)
+	return string(r)
+}
 

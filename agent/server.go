@@ -12,7 +12,9 @@ var serverInst *Server
 
 type Server struct {
 	dao         *rpc.Client
-	game        *rpc.Client
+	//	game        *rpc.Client
+	gameCli     *fw.Client
+	gameCtrl    chan string
 
 	mu          sync.RWMutex
 
@@ -29,17 +31,32 @@ func NewServer() (*Server, error) {
 		goto dao
 	}
 
-	// connect game server
-	game:	gamecli, err := rpc.Dial("tcp", cfg.GameAddr())
+	//	// connect game server
+	//	game:	gamecli, err := rpc.Dial("tcp", cfg.GameAddr())
+	//	if err != nil {
+	//		log.Warningf("game server connect failed(err=%+v), try again...", err.Error())
+	//		goto game
+	//	}
+
+	ctrl := make(chan string, 10)
+	game:    cli, err := fw.NewClient(cfg.AgentAddr(), &gameCliModel{}, ctrl)
 	if err != nil {
-		log.Warningf("game server connect failed(err=%+v), try again...", err.Error())
+		log.Error(err.Error())
+		time.Sleep(1 * time.Second)
 		goto game
 	}
+	go cli.Loop()
+
+	// daemon routine (to be done), with "ctrl"
+	// ......
+	////////////////////
 
 	// new server
 	serverInst = &Server{
 		dao: daocli,
-		game: gamecli,
+		//		game: gamecli,
+		gameCli: cli,
+		gameCtrl: ctrl,
 		loginAgents: make(map[string]*fw.Agent, 100),
 	}
 	return serverInst, nil

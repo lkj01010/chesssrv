@@ -4,26 +4,15 @@ import (
 	"github.com/lkj01010/log"
 	"chess/cfg"
 	"time"
+	"chess/fw"
 	"chess/game/cow"
 )
 
-// 封装一层是因为直接调用Server做rpc导出类,它有Close这个函数,不符合rpc类规范,报警告
 type Model struct {
-	Server *Server
-}
-
-func NewModel() *Model {
-	return &Model{Server: NewServer()}
-}
-
-func (m *Model)Exit() {
-	m.Server.close()
-}
-
-///////////////////////////////////////////////////////
-type Server struct {
 	dao         *rpc.Client
 
+	// 持有的外部agent (用来发消息)
+	agent       *fw.Agent
 	// 房间id counter
 	roomId      int
 	// 房间
@@ -34,8 +23,8 @@ type Server struct {
 	freeGames   [][]*cow.Game
 }
 
-func NewServer() *Server {
-	s := new(Server)
+func NewModel() *Model {
+	s := new(Model)
 
 	// connect dao server
 	dao:    daocli, err := rpc.Dial("tcp", cfg.DaoAddr())
@@ -54,18 +43,27 @@ func NewServer() *Server {
 	s.freeGames = [][]*cow.Game{}
 	// 1000 games each type
 	for i, _ := range (s.freeGames) {
-		s.games[i] = make([]*cow.Game)
+		s.freeGames[i] = make([]*cow.Game, 0, 1000)
 	}
 
 	return s
 }
 
-func (s *Server)close() {
-	if err := s.dao.Close(); err != nil {
-		log.Error(err.Error())
-	}
+func (m *Model)Hook(a *fw.Agent) {
+	m.agent = a
 }
 
+func (m *Model)Enter() {
+
+}
+
+func (m *Model)Exit() {
+	m.dao.Close()
+}
+
+func (m *Model)Handle(req string) (resp string, err error) {
+	return
+}
 ////////////////////////////////////////////
 type Game_EnterArgs struct {
 
@@ -75,7 +73,7 @@ type Game_EnterReply struct {
 
 }
 
-func (s *Server)EnterGame(args *Game_EnterArgs, reply *Game_EnterReply) error {
+func (s *Model)EnterGame(args *Game_EnterArgs, reply *Game_EnterReply) error {
 
 	return nil
 }
@@ -88,7 +86,7 @@ type Game_LeaveReply struct {
 
 }
 
-func (s *Server)LeaveGame(args*Game_LeaveArgs, reply *Game_LeaveReply) error {
+func (s *Model)LeaveGame(args*Game_LeaveArgs, reply *Game_LeaveReply) error {
 	return nil
 }
 
