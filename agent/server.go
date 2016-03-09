@@ -30,15 +30,8 @@ func NewServer() (*Server, error) {
 		goto dao
 	}
 
-	//	// connect game server
-	//	game:	gamecli, err := rpc.Dial("tcp", cfg.GameAddr())
-	//	if err != nil {
-	//		log.Warningf("game server connect failed(err=%+v), try again...", err.Error())
-	//		goto game
-	//	}
-
 	ctrl := make(chan string, 10)
-	game:    cli, err := fw.NewClient(cfg.AgentAddr(), &gameCliModel{}, ctrl)
+	game:    cli, err := fw.NewClient(cfg.GameAddr(), &gameCliModel{}, ctrl)
 	if err != nil {
 		log.Error(err.Error())
 		log.Warningf("game server connect fail(err=%+v), try again...", err.Error())

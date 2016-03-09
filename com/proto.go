@@ -45,11 +45,11 @@ func MakeIdMsgString(id string, cmd int, param int, content interface{}) string 
 
 ///////////////////////////////////////////////////////
 type ConnIdRawMsg struct {
-	ConnId  string `json:"connid"`
+	ConnId  int `json:"connid"`
 	Content string `json:"content"`
 }
 
-func MakeConnIdRawMsgString(connId string, content interface{}) string {
+func MakeConnIdRawMsgString(connId int, content interface{}) string {
 	var msg ConnIdRawMsg
 	msg.ConnId = connId
 	if content != nil {

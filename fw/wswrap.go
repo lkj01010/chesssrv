@@ -21,9 +21,9 @@ func NewWsReadWriter(ws *websocket.Conn) *WsClient {
 func (w *WsClient)Read(msg *string) (err error) {
 	err = websocket.Message.Receive(w.ws, msg)
 	if err != nil {
-		log.Errorf("WEBSOCKET RECV ERROR: %+v", err.Error())
+		log.Errorf("WS-RECV ERROR: %+v", err.Error())
 	}else{
-		log.Debugf("WEBSOCKET RECV: %#v\n", *msg)
+		log.Debugf("WS-RECV: %#v\n", *msg)
 	}
 	return
 }
@@ -31,9 +31,9 @@ func (w *WsClient)Read(msg *string) (err error) {
 func (w *WsClient)Write(msg string) (err error) {
 	err = websocket.Message.Send(w.ws, msg)
 	if err != nil {
-		log.Errorf("WEBSOCKET SEND ERROR: %+v", err.Error())
+		log.Errorf("WS-SEND ERROR: %+v", err.Error())
 	}else{
-		log.Debugf("WEBSOCKET SEND: %#v\n", msg)
+		log.Debugf("WS-SEND: %#v\n", msg)
 	}
 	return
 }

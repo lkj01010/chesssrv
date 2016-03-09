@@ -2,7 +2,6 @@ package fw
 
 import (
 	"net"
-	"chess/cfg"
 	"golang.org/x/net/websocket"
 	"github.com/lkj01010/log"
 	"time"
@@ -30,9 +29,9 @@ func newConfig(path string) *websocket.Config {
 }
 
 func NewClient(addr string, m ClientModel, out chan string) (*Client, error) {
-	L:    client, err := net.Dial("tcp", cfg.AgentAddr())
+	L:    client, err := net.Dial("tcp", addr)
 	if err != nil {
-		log.Warning("not connected to agent server, try again ...")
+		log.Warningf("not connected to %+v, try again ...", addr)
 		time.Sleep(1 * time.Second)
 		goto L
 	}

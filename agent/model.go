@@ -6,8 +6,6 @@ import (
 	log "github.com/lkj01010/log"
 	"net/rpc"
 	"chess/fw"
-	"errors"
-	"fmt"
 )
 
 //数据处理模块
@@ -16,7 +14,6 @@ type model struct {
 
 	agent   *fw.Agent
 
-	// 登录成功后赋值.通过是否为""判断是否登录
 	id      string
 	isLogin bool
 }
@@ -38,15 +35,11 @@ func (m *model)Enter() {
 }
 
 func (m *model)Exit() {
-	if m.isLogin {
-		serverInst.RemoveFromLoginAgent(m.id)
-	}
 }
 
 func (m *model)Handle(req string) (resp string, err error) {
 	var msg com.Msg
 	if err = json.Unmarshal([]byte(req), &msg); err != nil {
-//		log.Error("Unmarshal err: ", err)
 		return
 	}
 
@@ -55,8 +48,7 @@ func (m *model)Handle(req string) (resp string, err error) {
 	msg.Cmd != CmdRegisterReq &&
 	msg.Cmd != CmdAuthReq &&
 	msg.Cmd != CmdLoginReq) {
-		e := fmt.Sprintf("Handle:not allowed withou LOGIN:cmd=%+v", msg.Cmd)
-		err = errors.New(e)
+		err = com.ErrCommandWithoutLogin
 		return
 	}
 

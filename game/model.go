@@ -6,6 +6,8 @@ import (
 	"time"
 	"chess/fw"
 	"chess/game/cow"
+	"encoding/json"
+	"chess/com"
 )
 
 type Model struct {
@@ -62,34 +64,36 @@ func (m *Model)Exit() {
 }
 
 func (m *Model)Handle(req string) (resp string, err error) {
+	var outmsg com.ConnIdRawMsg
+	if err = json.Unmarshal([]byte(req), &outmsg); err != nil {
+		return
+	}
 
-	return
+	var msg com.Msg
+	if err = json.Unmarshal([]byte(req), &msg); err != nil {
+		return
+	}
+
+
+	switch msg.Cmd {
+	case Cmd_Game_EnterReq:
+		err = m.handleEnter(msg.Content)
+		return
+	}
+}
+
+///////////////////////////////////////////////////////
+// enter
+func (m *Model)enterGame() {
+
 }
 ////////////////////////////////////////////
-type Game_EnterArgs struct {
+func (m *Model)handleEnter(content string) (err error) {
+	var req EnterGame
+	if err = json.Unmarshal([]byte(content), &req); err != nil {
+		log.Error("content=", content, ", err: ", err.Error())
+		return
+	}
+	rt := req.RoomType
 
 }
-
-type Game_EnterReply struct {
-
-}
-
-func (s *Model)EnterGame(args *Game_EnterArgs, reply *Game_EnterReply) error {
-
-	return nil
-}
-
-////////////////////////////////////////////
-type Game_LeaveArgs struct {
-
-}
-type Game_LeaveReply struct {
-
-}
-
-func (s *Model)LeaveGame(args*Game_LeaveArgs, reply *Game_LeaveReply) error {
-	return nil
-}
-
-////////////////////////////////////////////
-

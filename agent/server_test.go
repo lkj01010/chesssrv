@@ -12,6 +12,7 @@ import (
 	"github.com/lkj01010/log"
 	"chess/cfg"
 	"time"
+	"chess/com"
 )
 
 func newClient() (*websocket.Conn, error) {
@@ -19,7 +20,7 @@ func newClient() (*websocket.Conn, error) {
 L:	client, err := net.Dial("tcp", cfg.AgentAddr())
 	if err != nil {
 		log.Warning("not connected to agent server, try again ...")
-		time.Sleep(1)
+		time.Sleep(1*time.Second)
 		goto L
 	}
 	conn, err := websocket.NewClient(newConfig_("/"), client)
@@ -30,8 +31,8 @@ L:	client, err := net.Dial("tcp", cfg.AgentAddr())
 	return conn, nil
 }
 
-func sendMsg(conn *websocket.Conn, msg []byte) (err error){
-	if _, err = conn.Write(msg); err != nil {
+func sendMsg(conn *websocket.Conn, msg string) (err error){
+	if _, err = conn.Write([]byte(msg)); err != nil {
 		log.Error(err.Error())
 		return
 	}
@@ -46,7 +47,7 @@ func sendMsg(conn *websocket.Conn, msg []byte) (err error){
 func startServer1() {
 	serve := func(ws *websocket.Conn) {
 		fmt.Printf("agent come")
-		agent := fw.NewAgent(&model{}, fw.NewWsReadWriter(ws))
+		agent := fw.NewAgent(&model{}, fw.NewWsReadWriter(ws), 1)
 		agent.Serve()
 	}
 
@@ -144,7 +145,7 @@ func TestServer2(t *testing.T) {
 		return
 	}
 
-	var msg []byte
+	var msg string
 
 //	log.Info("test:register")
 //	msg = []byte(`{"cmd":100,
@@ -154,7 +155,8 @@ func TestServer2(t *testing.T) {
 //	time.Sleep(1 * time.Second)
 
 	log.Info("test:cmdLoginReq1")
-	msg = []byte(`{"cmd":104,"content":"{\"account\":\"testUtf\",\"psw\":\"pswlk22\"}"}`)
+//	msg = []byte(`{"cmd":104,"content":"{\"account\":\"testUtf\",\"psw\":\"pswlk22\"}"}`)
+	msg = com.MakeMsgString(CmdLoginReq, 0, &LoginReq{"testUtf", "pswlk22"})
 	sendMsg(conn, msg)
 	time.Sleep(1 * time.Second)
 
@@ -164,10 +166,14 @@ func TestServer2(t *testing.T) {
 //	time.Sleep(1 * time.Second)
 
 	log.Info("test:handleInfo")
-	msg = []byte(`{"cmd":106}`)
+//	msg = []byte(`{"cmd":106}`)
 //	msg = []byte(`{"cmd":106,"content":"{\"account\":\"testUtf\",\"psw\":\"p\"}"}`)
+	msg = com.MakeMsgString(CmdInfoReq, 0, nil)
 	sendMsg(conn, msg)
 	time.Sleep(11 * time.Second)
+
+	log.Info("test:enter game room")
+	msg = com.MakeMsgString(Cmd_Ag_ToGameReq, 0, )
 
 }
 

@@ -58,3 +58,8 @@ func PrintType(v interface{}, args...interface{}) {
 		fmt.Printf("Value type is %T\n", v)
 	}
 }
+
+// print debug tag
+func D() {
+	fmt.Print("************************************************************************\n")
+}

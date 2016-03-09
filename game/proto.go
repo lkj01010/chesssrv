@@ -12,3 +12,7 @@ const (
 
 	Cmd_Game_End = 3499
 )
+
+type EnterGame struct {
+	RoomType int `json:"roomtype"`
+}

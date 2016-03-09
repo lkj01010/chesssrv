@@ -1,7 +1,5 @@
 package cow
 import (
-	"encoding/json"
-	"chess/com"
 )
 
 const (

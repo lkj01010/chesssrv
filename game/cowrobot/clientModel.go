@@ -9,22 +9,13 @@ import (
 	"chess/com"
 	"encoding/json"
 	"chess/agent"
-	"time"
 )
 
 
-type clientmodel struct {
+type Clientmodel struct {
 }
 
-func (c *clientmodel)Step(output *string){
-	*output = string(`{"cmd":104,"content":"{\"account\":\"testUtf\",\"psw\":\"pswlk22\"}"}`)
-	log.Debugf("Step: send=%+v", output)
-
-//	time.Sleep(1*time.Second)
-	time.Sleep(1)
-}
-
-func (c *clientmodel)Handle(req string) (err error) {
+func (c *Clientmodel)Handle(req string) (err error) {
 	var msg com.Msg
 	if err = json.Unmarshal([]byte(req), &msg); err != nil {
 		log.Error("Unmarshal err: ", err)
@@ -47,22 +38,22 @@ func (c *clientmodel)Handle(req string) (err error) {
 	return
 }
 
-func (c *clientmodel)handleRegister(content string) (err error) {
+func (c *Clientmodel)handleRegister(content string) (err error) {
 	log.Info("register")
 	return
 }
 
-func (c *clientmodel)handleAuth(content string) (err error) {
+func (c *Clientmodel)handleAuth(content string) (err error) {
 	log.Info("handleAuth")
 	return
 }
 
-func (c *clientmodel)handleLogin(content string) (err error) {
+func (c *Clientmodel)handleLogin(content string) (err error) {
 	log.Info("handleLogin")
 	return
 }
 
-func (c *clientmodel)handleInfo(content string) (err error) {
+func (c *Clientmodel)handleInfo(content string) (err error) {
 	log.Info("handleInfo")
 	return
 }

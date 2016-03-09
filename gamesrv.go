@@ -29,11 +29,20 @@ import (
 
 
 func main() {
+	var agent *fw.Agent
 	serve := func(ws *websocket.Conn) {
-		agent := fw.NewAgent(game.NewModel(), fw.NewWsReadWriter(ws))
-		if err := agent.Serve(); err != nil {
-			log.Error(err.Error())
+		// only ONE agent server allowed to connect
+		log.Debugf("new comes, agent=%+v", agent)
+		if agent == nil {
+			agent = fw.NewAgent(game.NewModel(), fw.NewWsReadWriter(ws), 1)
+			if err := agent.Serve(); err != nil {
+				log.Error(err.Error())
+			}
+		} else {
+			log.Warning("already connected by agentsrv, cannont serve more")
 		}
+		// release
+		agent = nil
 	}
 
 	http.Handle("/", websocket.Handler(serve))

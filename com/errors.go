@@ -17,4 +17,5 @@ const (
 var (
 	ErrClientTimeout = errors.New("client timeout")
 	ErrAgentNotFound = errors.New("agent not found")
+	ErrCommandWithoutLogin = errors.New("command without login")
 )

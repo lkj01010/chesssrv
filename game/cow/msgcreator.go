@@ -1,5 +1,6 @@
 package cow
 import (
+	"chess/com"
 )
 
 type msgCreator struct{}
@@ -9,8 +10,9 @@ func init() {
 	msgcInst = msgCreator{}
 }
 
-func (mc *msgCreator)hasNoEnoughMoney(id string) string {
-	msg := MakeMsgString(id, Cmd_Cow_NotEnoughMoneyNtf, 0, nil)
+func (mc *msgCreator)hasNoEnoughMoney(id int) string {
+	content := com.MakeMsgString(Cmd_Cow_NotEnoughMoneyNtf, 0, nil)
+	msg := com.MakeConnIdRawMsgString(id, content)
 	return msg
 }
 
