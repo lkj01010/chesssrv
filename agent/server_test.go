@@ -164,7 +164,8 @@ func TestServer2(t *testing.T) {
 //	time.Sleep(1 * time.Second)
 
 	log.Info("test:handleInfo")
-	msg = []byte(`{"cmd":106,"content":"{\"account\":\"testUtf\",\"psw\":\"p\"}"}`)
+	msg = []byte(`{"cmd":106}`)
+//	msg = []byte(`{"cmd":106,"content":"{\"account\":\"testUtf\",\"psw\":\"p\"}"}`)
 	sendMsg(conn, msg)
 	time.Sleep(11 * time.Second)
 

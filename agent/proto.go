@@ -17,8 +17,7 @@ const (
 	CmdToLobbyReq = 200
 	CmdToLobbyResp = 201
 
-	CmdToGameReq = 202
-	CmdToGameResp = 203
+	Cmd_Ag_ToGameReq = 202
 )
 
 var cmdText = &map[int]string{
@@ -32,8 +31,7 @@ var cmdText = &map[int]string{
 
 	CmdToLobbyReq:    "toLobbyReq",
 	CmdToLobbyResp:    "toLobbyResp",
-	CmdToGameReq:    "toGameReq",
-	CmdToGameResp:    "toGameResp",
+	Cmd_Ag_ToGameReq:    "toGameReq",
 }
 
 //var loginMethodCodes map[string]int
@@ -68,14 +66,17 @@ type ToLobbyReq struct {
 	Msg string `json:"msg"`
 }
 
-type ToLobbyResp struct {
+type FromLobbyResp struct {
 	Msg string `json:"msg"`
 }
 
 type ToRoomReq struct {
-	Msg string `json:"msg"`
+	Id string `json:"id"`
+	Content string `json:"content"`
 }
 
-type ToRoomResp struct {
+type FromRoomResp struct {
+	Id string `json:"id"`
+	Cmd string `json:"cmd"`
 	Msg string `json:"msg"`
 }

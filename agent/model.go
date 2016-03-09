@@ -39,7 +39,7 @@ func (m *model)Enter() {
 
 func (m *model)Exit() {
 	if m.isLogin {
-		serverInst.RemoveAgent(m.id)
+		serverInst.RemoveFromLoginAgent(m.id)
 	}
 }
 
@@ -72,7 +72,7 @@ func (m *model)Handle(req string) (resp string, err error) {
 	case CmdInfoReq:
 		resp, err = m.handleInfo(msg.Content)
 
-	case CmdToGameReq:
+	case Cmd_Ag_ToGameReq:
 		resp, err = m.handleToGame(msg.Content)
 	}
 
@@ -129,7 +129,6 @@ func (m *model)handleLogin(content string) (resp string, err error) {
 		//登录成功,记录用户id
 		m.id = reply.Id
 		m.isLogin = true
-		serverInst.AddAgent(m.id, m.agent)
 	}
 	resp = com.MakeMsgString(CmdLoginResp, reply.Code, nil)
 	return
@@ -148,7 +147,12 @@ func (m *model)handleInfo(content string) (resp string, err error) {
 }
 
 func (m *model)handleToGame(content string) (resp string, err error) {
-	//	args := &
-	// todo:0308
+	req := &ToRoomReq{Id: m.id, Content: content}
+	var b []byte
+	if b, err = json.Marshal(req); err != nil {
+		log.Error("handleToGame:error=", err)
+	}
+	msg := com.MakeConnIdRawMsgString(m.agent.ConnId, b)	// can? b is of []type, need string
+	serverInst.gameCli.Send(msg)
 	return
 }

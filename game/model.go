@@ -62,6 +62,7 @@ func (m *Model)Exit() {
 }
 
 func (m *Model)Handle(req string) (resp string, err error) {
+
 	return
 }
 ////////////////////////////////////////////

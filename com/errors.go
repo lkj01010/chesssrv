@@ -16,4 +16,5 @@ const (
 
 var (
 	ErrClientTimeout = errors.New("client timeout")
+	ErrAgentNotFound = errors.New("agent not found")
 )

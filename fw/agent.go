@@ -18,14 +18,16 @@ type Model interface {
 type Agent struct {
 	Model
 	ReadWriteCloser
-	out chan string
-	send chan string
+	ConnId int
+	out    chan string
+	send   chan string
 }
 
-func NewAgent(m Model, rw ReadWriteCloser) *Agent {
+func NewAgent(m Model, rwc ReadWriteCloser, connId int) *Agent {
 	a := &Agent{
 		Model: m,
-		ReadWriteCloser: rw,
+		ReadWriteCloser: rwc,
+		ConnId: connId,
 		out: make(chan string, 10),
 		send: make(chan string, 10),
 	}

@@ -11,15 +11,14 @@ import (
 var serverInst *Server
 
 type Server struct {
-	dao         *rpc.Client
+	dao       *rpc.Client
 	//	game        *rpc.Client
-	gameCli     *fw.Client
-	gameCtrl    chan string
+	gameCli   *fw.Client
+	gameCtrl  chan string
 
-	mu          sync.RWMutex
-
-	//	allAgents	map[agent]interface{}
-	loginAgents map[string]*fw.Agent
+	connIdAcc int
+	mu        sync.RWMutex
+	agents    map[int]*fw.Agent
 }
 
 func NewServer() (*Server, error) {
@@ -42,6 +41,7 @@ func NewServer() (*Server, error) {
 	game:    cli, err := fw.NewClient(cfg.AgentAddr(), &gameCliModel{}, ctrl)
 	if err != nil {
 		log.Error(err.Error())
+		log.Warningf("game server connect fail(err=%+v), try again...", err.Error())
 		time.Sleep(1 * time.Second)
 		goto game
 	}
@@ -54,58 +54,22 @@ func NewServer() (*Server, error) {
 	// new server
 	serverInst = &Server{
 		dao: daocli,
-		//		game: gamecli,
 		gameCli: cli,
 		gameCtrl: ctrl,
-		loginAgents: make(map[string]*fw.Agent, 100),
+		connIdAcc: 0,
+		agents: make(map[int]*fw.Agent, 1000),
 	}
 	return serverInst, nil
 }
-
-//func GetServer() *Server {
-//	if serverInst != nil {
-//		return serverInst
-//	} else {
-//		var err error
-//		serverInst, err = NewServer()
-//		if err != nil {
-//			log.Panic("new server error: ", err.Error())
-//		}
-//	}
-//	return serverInst
-//}
 
 func (s *Server)Close() {
 	if err := s.dao.Close(); err != nil {
 		log.Error(err.Error())
 	}
-	for _, v := range s.loginAgents {
+	for _, v := range s.agents {
 		if err := v.Close(); err != nil {
 			log.Error(err.Error())
 		}
-	}
-}
-
-func (s *Server)AddAgent(id string, agent *fw.Agent) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if _, ok := s.loginAgents[id]; ok {
-		log.Warning("AddAgent: agent exist: id=", id)
-	}
-	s.loginAgents[id] = agent
-	log.Debugf("agent add, agent count=%v", len(s.loginAgents))
-}
-
-func (s *Server)RemoveAgent(id string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if _, ok := s.loginAgents[id]; ok {
-		delete(s.loginAgents, id)
-		log.Debugf("agent remove, agent count=%v", len(s.loginAgents))
-	} else {
-		log.Warning("RemoveAgent: agent not exist: id=", id)
 	}
 }
 
@@ -113,13 +77,34 @@ func (s *Server)AgentCount() int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	return len(s.loginAgents)
+	return len(s.agents)
+}
+
+func (s *Server)GetAgent(connId int) *fw.Agent {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if a, ok := s.agents[connId]; ok {
+		return a
+	}else{
+		return nil
+	}
 }
 
 func (s *Server)Serve(rwc fw.ReadWriteCloser) (err error) {
-	agent := fw.NewAgent(&model{dao: s.dao}, rwc)
-	//	agent := NewAgent(rwc, s.dao)
-	defer agent.Close()    // close it!
+	s.connIdAcc ++
+	agent := fw.NewAgent(&model{dao: s.dao}, rwc, s.connIdAcc)
+
+	// add to map
+	s.mu.Lock()
+	s.agents[s.connIdAcc] = agent
+	s.mu.Unlock()
+
+	defer func() {
+		s.mu.Lock()
+		delete(s.agents, agent.ConnId)
+		s.mu.Unlock()
+		defer agent.Close()    // close it!
+	}()
 
 	if err = agent.Serve(); err != nil {
 		return
