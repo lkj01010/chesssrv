@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 package fw
-
+/*
 import (
 	"bytes"
 	"encoding/json"
@@ -297,3 +297,4 @@ func (p *pipe) SetReadTimeout(nsec int64) error {
 func (p *pipe) SetWriteTimeout(nsec int64) error {
 	return errors.New("net.Pipe does not support timeouts")
 }
+*/

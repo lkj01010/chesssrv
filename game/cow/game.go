@@ -6,7 +6,8 @@ import (
 
 type DaoCtrl interface {
 	AddCoin(id string, coin int)
-	GetMultiCoin(id []string) map[string]int
+	GetCoin(id string) int
+	MGetCoin(id []string) map[string]int
 }
 
 type gameState int
@@ -27,16 +28,16 @@ type Game struct {
 	timer    *time.Timer
 }
 
-func NewGame(c chan string, enterCoin int) *Game {
+func NewGame(enterCoin int) *Game {
 	return &Game{
-		c: c,
+		c: make(chan string, 10),
 		enterCoin: enterCoin,
 		players: make([]*player, 0, maxPlayer),
 		timer: time.NewTimer(0),
 	}
 }
 
-func (g *Game)Serve() {
+func (g *Game)Go() {
 	for {
 		select {
 		case <-g.timer.C:
@@ -47,7 +48,8 @@ func (g *Game)Serve() {
 	}
 }
 
-func (g *Game)PlayerEnter(id string, coin int) {
+func (g *Game)PlayerEnter(id string) {
+	coin := g.MGetCoin()
 	g.players = append(g.players, NewPlayer(id, coin))
 }
 
@@ -85,7 +87,7 @@ func (g *Game)checkCoinEnough() {
 			ids = append(ids, player.id)
 		}
 	}
-	playerCoinMap := g.GetMultiCoin(ids)
+	playerCoinMap := g.MGetCoin(ids)
 
 //	for id, coin := range (playerCoinMap) {
 	for _, coin := range (playerCoinMap) {

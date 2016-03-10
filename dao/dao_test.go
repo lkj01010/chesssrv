@@ -77,7 +77,7 @@ func TestDaoClient(t *testing.T) {
 	}
 	{
 		var reply RpcReply
-		args := User_AuthArgs{"zhu001", "21882"}
+		args := User_RegisterArgs{"zhu001", "21882"}
 		if err := cli.UserRegister(&args, &reply); err != nil {
 			log.Error(err.Error())
 		}

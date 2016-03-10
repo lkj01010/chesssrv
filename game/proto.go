@@ -14,5 +14,6 @@ const (
 )
 
 type EnterGame struct {
+	Id string `json:"id"`
 	RoomType int `json:"roomtype"`
 }

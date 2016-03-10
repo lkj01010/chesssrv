@@ -14,8 +14,16 @@ const (
 	E_AgentPasswordCannotBeNull = 1003
 )
 
+// game
+const (
+	E_GameAlreadyInGame = 2000
+)
 var (
 	ErrClientTimeout = errors.New("client timeout")
 	ErrAgentNotFound = errors.New("agent not found")
 	ErrCommandWithoutLogin = errors.New("command without login")
+
+
+	// game
+	ErrAlreadyInGame = errors.New("player already in game")
 )

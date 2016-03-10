@@ -3,7 +3,7 @@ import (
 )
 
 const (
-	Cmd_Cow_Start = 3500
+	Cmd_Cow_Ready = 3500
 	Cmd_Cow_DealNtf = 3502
 	Cmd_Cow_CardTypeShowReq = 3510
 	Cmd_Cow_CardTypeShowNtf = 3511

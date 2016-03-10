@@ -19,7 +19,7 @@ func BenchmarkFastRand(b *testing.B) {
 }
 func BenchmarkFastRandn(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		FastRandn(100)
+		FastRandn(100000)
 	}
 }
 func BenchmarkRandlibRand(b *testing.B) {
@@ -42,4 +42,28 @@ func BenchmarkDiv(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = 12122 / 2221
 	}
+}
+
+var vmap = make(map[int]int, 10000)
+const maptimes = 100
+func init(){
+//	for i := 0; i < maptimes; i++ {
+//		vmap[i] = i
+//	}
+}
+
+// big map random access 30ns/op, write 230ns/op
+func BenchmarkMapAccess(b *testing.B){
+	temp := 0
+	for i := 0; i < b.N; i ++ {
+		vmap[i] = i
+		temp = vmap[i]
+		temp = vmap[i]
+		temp = vmap[i]
+		temp = vmap[i]
+		temp = vmap[i]
+		temp = vmap[i]
+		temp = vmap[i]
+	}
+	b.Log(temp)
 }
