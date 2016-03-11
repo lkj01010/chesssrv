@@ -33,7 +33,7 @@ func (p *playerAgent)Go() {
 	}
 }
 
-func (p *playerAgent)Recive(msg string) {
+func (p *playerAgent)Receive(msg string) {
 	p.c <- msg
 }
 

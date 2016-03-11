@@ -4,6 +4,7 @@ import (
 	"sync"
 	"net/rpc"
 	"chess/dao"
+	"fmt"
 )
 
 type gameState int
@@ -113,6 +114,10 @@ func (g *Game)checkCoinEnough() {
 }
 
 func (g *Game)settle() {
+	for _, player := range (g.players) {
+		// test
+		player.sendFunc(msgCreatorInst.Settle(&SettleNtf{TempString:fmt.Sprintf("id=%+v, string=%+v", player.id, "haha")}))
+	}
 	g.timer.Reset(timeout_newrount)
 }
 

@@ -14,5 +14,7 @@ const (
 	Cmd_Cow_End = 3999
 )
 
-
+type SettleNtf struct {
+	TempString string `json:"tempstring"`
+}
 

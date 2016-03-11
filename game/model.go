@@ -94,7 +94,7 @@ func (m *Model)Handle(req string) (resp string, err error) {
 		m.playerAgents[connId] = pa
 	}
 
-	pa.Recive(outmsg.Content)
+	pa.Receive(outmsg.Content)
 	return
 }
 
