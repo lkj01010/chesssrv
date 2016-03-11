@@ -80,7 +80,7 @@ func (p *playerAgent)handleEnterReq(content string) (err error) {
 		if reply.Code == com.E_Success {
 			isCoinEnough = (reply.Coin >= RoomEnterCoin[content.RoomType])
 		}else {
-			err = com.ErrRedisValueNotFound
+			err =  com.ErrRedisValueNotFound
 			return
 		}
 
