@@ -1,6 +1,5 @@
 package game
 import (
-	"chess/game/cow"
 	"encoding/json"
 	"chess/com"
 	"github.com/lkj01010/log"
@@ -73,12 +72,12 @@ func (p *playerAgent)handleEnterReq(content string) (err error) {
 
 		//判断钱是否够
 		var isCoinEnough bool
-		var reply dao.User_PlayerCoinReply
-		if err = modelInst.dao.Call("User.Coin", dao.User_PlayerCoinArgs{p.id}, &reply); err != nil {
+		var reply dao.Reply
+		if err = modelInst.dao.Call("User.GetCoin", dao.Args{p.id}, &reply); err != nil {
 			return
 		}
 		if reply.Code == com.E_Success {
-			isCoinEnough = (reply.Coin >= RoomEnterCoin[content.RoomType])
+			isCoinEnough = (reply.Int >= RoomEnterCoin[content.RoomType])
 		}else {
 			err =  com.ErrRedisValueNotFound
 			return
@@ -87,7 +86,6 @@ func (p *playerAgent)handleEnterReq(content string) (err error) {
 		// 够入场费
 		if isCoinEnough {
 			// 塞进房间
-
 			game := modelInst.GetFreeGameByType(content.RoomType)
 			game.PlayerEnter(content.Id, p.toGame, p.Send)
 		}else {

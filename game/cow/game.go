@@ -1,21 +1,17 @@
 package cow
 import (
 	"time"
-	"github.com/lkj01010/log"
 	"sync"
+	"net/rpc"
+	"chess/dao"
 )
-
-type DaoCtrl interface {
-	AddCoin(id string, coin int)
-	GetCoin(id string) int
-	MGetCoin(id []string) map[string]int
-}
 
 type gameState int
 const (
 	gsWait gameState = iota    // 发牌
 	gsDeal
 	gsSettle    // 结算
+	gsExit    // 全部人退出,销毁
 )
 
 type PlayerMsg struct {
@@ -24,25 +20,24 @@ type PlayerMsg struct {
 }
 
 type Game struct {
-	DaoCtrl
-	id            int
+	dao       *rpc.Client
+	id        int
 	//	roomType RoomType
-	enterCoin     int
+	enterCoin int
 
-	state         gameState
+	state     gameState
 
-	playerMsgRcvr chan string
-	players       []*player
-	playersMu     sync.Mutex
+	players   []*player
+	playersMu sync.Mutex
 
-	timer         *time.Timer
+	timer     *time.Timer
 }
 
-func NewGame(id, enterCoin int) *Game {
+func NewGame(dao *rpc.Client, id, enterCoin int) *Game {
 	return &Game{
+		dao: dao,
 		id: id,
 		enterCoin: enterCoin,
-		playerMsgRcvr: make(chan string, 10),
 		players: make([]*player, 0, maxPlayer),
 		timer: time.NewTimer(0),
 	}
@@ -53,19 +48,33 @@ func (g *Game)Go() {
 		select {
 		case <-g.timer.C:
 			g.onTimer()
-		case msg := <-g.playerMsgRcvr:
-			log.Debugf("game chan recv=%+v", msg)
+		}
+
+		for i, player := range g.players {
+			select {
+			case msg := <-player.rcvr:
+				g.handlePlayerMsg(i, msg)
+			}
+		}
+
+		if g.state == gsExit {
+			return
 		}
 	}
 }
 
 func (g *Game)PlayerEnter(id string, rcvr chan string, sendFunc func(msg string)) {
+	player := NewPlayer(id, rcvr, sendFunc)
+
 	g.playersMu.Lock()
-	g.players = append(g.players, NewPlayer(id, sendFunc))
+	g.players = append(g.players, player)
 	g.playersMu.Unlock()
 
-	// fixme:
-	g.playerMsgRcvr <- rcvr
+	// get info from db
+	var reply dao.Reply
+	g.dao.Call("User.GetCoin", &dao.Args{Id: id}, &reply)
+
+	player.coin = reply.Int
 }
 
 func (g *Game)onTimer() {
@@ -96,25 +105,17 @@ func (g* Game)Deal() {
 }
 
 func (g *Game)checkCoinEnough() {
-	ids := []string{}
 	for _, player := range (g.players) {
-		if (player.state == psPlay) {
-			ids = append(ids, player.id)
-		}
-	}
-	playerCoinMap := g.MGetCoin(ids)
-
-	//	for id, coin := range (playerCoinMap) {
-	for _, coin := range (playerCoinMap) {
-		if coin < g.enterCoin {
-			// 没有足够的钱玩
-			//			g.c <- msgcInst.hasNoEnoughMoney(id)
-			// todo: connId
-			g.c <- msgcInst.hasNoEnoughMoney(0)
+		if player.state == psPlay && player.coin < g.enterCoin {
+			player.sendFunc(msgCreatorInst.hasNoEnoughMoney())
 		}
 	}
 }
 
 func (g *Game)settle() {
 	g.timer.Reset(timeout_newrount)
+}
+
+func (g *Game)handlePlayerMsg(idx int, msg string) {
+
 }

@@ -65,7 +65,7 @@ type User_RegisterArgs struct {
 	Account, Psw string
 }
 
-func (u *User)Register(args *User_RegisterArgs, reply *RpcReply) error {
+func (u *User)Register(args *User_RegisterArgs, reply *Reply) error {
 	if args.Psw == "" {
 		reply.Code = com.E_AgentPasswordCannotBeNull
 	} else {
@@ -152,23 +152,18 @@ func (u *User)Auth(args *User_AuthArgs, reply *User_AuthReply) (err error) {
 	return
 }
 ///////////////////////////////////////////////////////
-type User_InfoArgs struct {
-	Id string
-}
-
-//test
 type User_Info struct {
 	Id       string    `json:"id"`
 	Nickname string `json:"nickname"`
 	Coin     int    `json:"coin"`
 }
+
 type User_InfoReply struct {
 	Code int
 	Info User_Info
 }
 
-// todo:
-func (u *User)Info(args *User_InfoArgs, reply *User_InfoReply) (err error) {
+func (u *User)Info(args *Args, reply *User_InfoReply) (err error) {
 	var nickname string
 
 	coin, _ := redis.Int(u.c.Do("HGET", k_user_ + args.Id, k_coin))
@@ -187,16 +182,7 @@ func (u *User)Info(args *User_InfoArgs, reply *User_InfoReply) (err error) {
 }
 
 ///////////////////////////////////////////////////////
-type User_PlayerCoinArgs struct {
-	Id string
-}
-
-type User_PlayerCoinReply struct {
-	Code int
-	Coin int `json:"coin"`
-}
-
-func (u *User)Coin(args *User_PlayerCoinArgs, reply *User_PlayerCoinReply) (err error) {
+func (u *User)GetCoin(args *Args, reply *Reply) (err error) {
 	var coin int
 	coin, err = redis.Int(u.c.Do("HGET", k_user_ + args.Id, k_coin))
 	if err != nil {
@@ -204,7 +190,19 @@ func (u *User)Coin(args *User_PlayerCoinArgs, reply *User_PlayerCoinReply) (err 
 		reply.Code = com.E_ValueNotFound
 	} else {
 		reply.Code = com.E_Success
-		reply.Coin = coin
+		reply.Int = coin
+	}
+	return
+}
+
+///////////////////////////////////////////////////////
+func (u *User)AddCoin(args *Args, reply *Reply) (err error) {
+	_, err = u.c.Do("HINCRBY", k_user_ + args.Id, k_coin, args.Int)
+	if err != nil {
+		log.Warning("AddCoin:err=", err.Error())
+		reply.Code = com.E_ValueNotFound
+	} else {
+		reply.Code = com.E_Success
 	}
 	return
 }

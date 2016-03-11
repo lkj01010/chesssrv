@@ -18,16 +18,22 @@ const (
 	rtLocal = "local"
 	rtDev = "dev"
 )
-var RemoteType = rtLocal
+var RemoteType = rtDev
+
+//const (
+//	ipSpecial = "spe"
+//	ipLocal = "loc"
+//)
+//var IpType = ipSpecial
 
 var IPs = map[string]string{
-	rtDev : "42.62.101.24",
-	rtLocal:"127.0.0.1",
+	rtDev : "",
+	rtLocal:"",
 }
 
 var RedisIPs = map[string]string{
 	rtDev : "42.62.101.24",
-	rtLocal: "42.62.101.24",
+	rtLocal: "",
 }
 
 const (
@@ -39,8 +45,7 @@ const (
 )
 
 func RedisAddr() (string) {
-	addr := RedisIPs[RemoteType] + ":" + RedisPort
-	return addr
+	return RedisIPs[RemoteType] + ":" + RedisPort
 }
 
 func AgentAddr() string {

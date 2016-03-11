@@ -100,23 +100,23 @@ func (m *Model)Handle(req string) (resp string, err error) {
 
 func (m *Model)GetFreeGameByType(typ RoomType) (game *cow.Game) {
 	games := modelInst.freeGames[typ]
+
+	m.gamesMu.Lock()
+	defer m.gamesMu.Unlock()
+
 	var game *cow.Game
 	if len(games) == 0 {
 		// create game
-		m.gamesMu.Lock()
 		m.gameIdAcc++
-		game = cow.NewGame(m.gameIdAcc, RoomEnterCoin[typ])
+		game = cow.NewGame(m.dao, m.gameIdAcc, RoomEnterCoin[typ])
 		game.Go()
 
 		games = append(games, game)
 		m.games[m.gameIdAcc] = game
-		m.gamesMu.Unlock()
 
 	} else {
 		// put to first game
-		m.gamesMu.RLock()
 		game = games[0]
-		m.gamesMu.RUnlock()
 	}
 	return
 }

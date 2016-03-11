@@ -173,7 +173,7 @@ func TestServer2(t *testing.T) {
 	time.Sleep(11 * time.Second)
 
 	log.Info("test:enter game room")
-	msg = com.MakeMsgString(Cmd_Ag_ToGameReq, 0, )
+	msg = com.MakeMsgString(Cmd_Ag_ToGameReq, 0, nil)
 
 }
 

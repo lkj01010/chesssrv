@@ -82,7 +82,7 @@ func (m *model)handleRegister(content string) (resp string, err error) {
 		return
 	}
 	args := &dao.User_RegisterArgs{req.Account, req.Psw}
-	var reply dao.RpcReply
+	var reply dao.Reply
 	log.Debugf("req : %#v", req)
 	//	if err = h.dc.UserRegister(&args, &reply); err != nil {
 	if err = m.dao.Call("User.Register", args, &reply); err != nil {
@@ -127,7 +127,7 @@ func (m *model)handleLogin(content string) (resp string, err error) {
 }
 
 func (m *model)handleInfo(content string) (resp string, err error) {
-	args := &dao.User_InfoArgs{Id: m.id}
+	args := &dao.Args{Id: m.id}
 	log.Debugf("handleInfo args=%+v", args)
 	var reply dao.User_InfoReply
 	if err = m.dao.Call("User.Info", args, &reply); err != nil {

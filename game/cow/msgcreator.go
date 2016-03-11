@@ -4,16 +4,14 @@ import (
 )
 
 type msgCreator struct{}
-var msgcInst msgCreator
+var msgCreatorInst msgCreator
 
 func init() {
-	msgcInst = msgCreator{}
+	msgCreatorInst = msgCreator{}
 }
 
-func (mc *msgCreator)hasNoEnoughMoney(id int) string {
-	content := com.MakeMsgString(Cmd_Cow_NotEnoughMoneyNtf, 0, nil)
-	msg := com.MakeConnIdRawMsgString(id, content)
-	return msg
+func (mc *msgCreator)hasNoEnoughMoney() string {
+	return com.MakeMsgString(Cmd_Cow_NotEnoughMoneyNtf, 0, nil)
 }
 
 
