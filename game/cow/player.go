@@ -11,13 +11,14 @@ type player struct {
 	coin  int
 	state playerState
 	cards []card
+	sendFunc func(msg string)
 }
 
-func NewPlayer(id string, coin int) *player {
+func NewPlayer(id string, sendFunc func(msg string)) *player {
 	return &player{
 		id: id,
-		coin: coin,
 		state: psWait,
 		cards : make([]card, 5),
+		sendFunc: sendFunc,
 	}
 }

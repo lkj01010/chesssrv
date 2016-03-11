@@ -10,7 +10,7 @@ const (
 
 // user
 	k_user_ = "user:"    // + id [hash] 用户档案
-	k_gold = "gold" //
+	k_coin = "coin" //
 	k_nickname = "nickname"    //
 
 )

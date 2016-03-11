@@ -85,7 +85,7 @@ func (u *User)Register(args *User_RegisterArgs, reply *RpcReply) error {
 			// save user
 			userkey := k_user_ + string(id)
 			u.c.Do("HSET", userkey, k_psw, args.Psw)
-			u.c.Do("HSET", userkey, k_gold, 0)
+			u.c.Do("HSET", userkey, k_coin, 0)
 			u.c.Do("HSET", userkey, k_nickname, "nickname")
 
 			reply.Code = com.E_Success
@@ -151,7 +151,7 @@ func (u *User)Auth(args *User_AuthArgs, reply *User_AuthReply) (err error) {
 	//	}
 	return
 }
-
+///////////////////////////////////////////////////////
 type User_InfoArgs struct {
 	Id string
 }
@@ -160,7 +160,7 @@ type User_InfoArgs struct {
 type User_Info struct {
 	Id       string    `json:"id"`
 	Nickname string `json:"nickname"`
-	Gold     int64    `json:"gold"`
+	Coin     int    `json:"coin"`
 }
 type User_InfoReply struct {
 	Code int
@@ -171,9 +171,9 @@ type User_InfoReply struct {
 func (u *User)Info(args *User_InfoArgs, reply *User_InfoReply) (err error) {
 	var nickname string
 
-	gold, _ := redis.Int64(u.c.Do("HGET", k_user_ + args.Id, k_gold))
+	coin, _ := redis.Int(u.c.Do("HGET", k_user_ + args.Id, k_coin))
 	nickname, _= redis.String(u.c.Do("HGET", k_user_ + args.Id, k_nickname))
-	log.Infof("gold=%+v", gold)
+	log.Infof("coin=%+v", coin)
 	// fixme:这里用是否为空判断用户存在与否
 	if nickname == "" {
 		reply.Code = com.E_AgentAccountNotExist
@@ -181,7 +181,30 @@ func (u *User)Info(args *User_InfoArgs, reply *User_InfoReply) (err error) {
 		reply.Code = com.E_Success
 		reply.Info.Id = args.Id
 		reply.Info.Nickname = nickname
-		reply.Info.Gold = gold
+		reply.Info.Coin = coin
+	}
+	return
+}
+
+///////////////////////////////////////////////////////
+type User_PlayerCoinArgs struct {
+	Id string
+}
+
+type User_PlayerCoinReply struct {
+	Code int
+	Coin int `json:"coin"`
+}
+
+func (u *User)Coin(args *User_PlayerCoinArgs, reply *User_PlayerCoinReply) (err error) {
+	var coin int
+	coin, err = redis.Int(u.c.Do("HGET", k_user_ + args.Id, k_coin))
+	if err != nil {
+		log.Warningf("Coin:not found, id=%+v", args.Id)
+		reply.Code = com.E_ValueNotFound
+	} else {
+		reply.Code = com.E_Success
+		reply.Coin = coin
 	}
 	return
 }

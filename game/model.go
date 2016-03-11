@@ -16,21 +16,18 @@ var modelInst *Model
 type Model struct {
 	dao          *rpc.Client
 
-	// 持有的外部agent (用来发消息)
-	agent        *fw.Agent
+	agent        *fw.Agent             // 持有的外部agent (用来发消息)
 
-	// 消息分发到用户的agent
-	playerAgents map[int]*playerAgent
+	playerAgents map[int]*playerAgent  // 消息分发到用户的agent
 	mu           sync.Mutex
 
-	// 房间id counter
-	roomIdAcc    int
-	// 房间
-	games        map[int]*cow.Game
-	// 玩家（id） 对应其进入的game
-	playerGames  map[string]*cow.Game
-	// 每个type一个数组
-	freeGames    [RoomType][]*cow.Game
+	gameIdAcc    int                   // 房间id counter
+
+	games        map[int]*cow.Game     // 房间
+	freeGames    [RoomType][]*cow.Game // 每个type一个数组
+	gamesMu      sync.RWMutex
+
+	playerGames  map[string]*cow.Game  // 玩家（id） 对应其进入的game
 }
 
 func NewModel() *Model {
@@ -50,7 +47,7 @@ func NewModel() *Model {
 	modelInst.dao = daocli
 
 	// data init
-	modelInst.roomIdAcc = 0
+	modelInst.gameIdAcc = 0
 	modelInst.games = map[int]*cow.Game{}
 	modelInst.playerGames = map[string]*cow.Game{}
 	modelInst.freeGames = [][]*cow.Game{}
@@ -74,7 +71,7 @@ func (m *Model)Exit() {
 	m.dao.Close()
 }
 
-func (m *Model)playerAgentSend(connId int, msg string){
+func (m *Model)playerAgentSend(connId int, msg string) {
 	idmsg := com.MakeConnIdRawMsgString(connId, msg)
 	m.agent.Send(idmsg)
 }
@@ -97,43 +94,33 @@ func (m *Model)Handle(req string) (resp string, err error) {
 		m.playerAgents[connId] = pa
 	}
 
-
-
-
-
 	pa.Recive(outmsg.Content)
+	return
+}
 
+func (m *Model)GetFreeGameByType(typ RoomType) (game *cow.Game) {
+	games := modelInst.freeGames[typ]
+	var game *cow.Game
+	if len(games) == 0 {
+		// create game
+		m.gamesMu.Lock()
+		m.gameIdAcc++
+		game = cow.NewGame(m.gameIdAcc, RoomEnterCoin[typ])
+		game.Go()
 
-	if msg.Cmd == Cmd_Game_EnterReq {
-		_, e := m.playerGames[connId]
-		if e == nil {
-			log.Warning("game:model:handle:player enter req, err=already in game")
-			return com.ErrAlreadyInGame
-		}
-
+		games = append(games, game)
+		m.games[m.gameIdAcc] = game
+		m.gamesMu.Unlock()
 
 	} else {
-
+		// put to first game
+		m.gamesMu.RLock()
+		game = games[0]
+		m.gamesMu.RUnlock()
 	}
-
-
-
-
+	return
 }
 
+func (m *Model)RemovePlayerAgent(connId string) {
 
-///////////////////////////////////////////////////////
-// enter
-func (m *Model)enterGame(id string, roomType RoomType) {
-
-}
-////////////////////////////////////////////
-func (m *Model)handleEnter(connId, content string) (err error) {
-	var req EnterGame
-	if err = json.Unmarshal([]byte(content), &req); err != nil {
-		log.Error("content=", content, ", err: ", err.Error())
-		return
-	}
-
-	m.enterGame(connId, )
 }

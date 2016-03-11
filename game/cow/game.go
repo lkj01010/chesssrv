@@ -2,6 +2,7 @@ package cow
 import (
 	"time"
 	"github.com/lkj01010/log"
+	"sync"
 )
 
 type DaoCtrl interface {
@@ -17,21 +18,31 @@ const (
 	gsSettle    // 结算
 )
 
-type Game struct {
-	DaoCtrl
-	c        chan string
-//	roomType RoomType
-	enterCoin int
-
-	state    gameState
-	players  []*player
-	timer    *time.Timer
+type PlayerMsg struct {
+	Id  string
+	msg string
 }
 
-func NewGame(enterCoin int) *Game {
+type Game struct {
+	DaoCtrl
+	id            int
+	//	roomType RoomType
+	enterCoin     int
+
+	state         gameState
+
+	playerMsgRcvr chan string
+	players       []*player
+	playersMu     sync.Mutex
+
+	timer         *time.Timer
+}
+
+func NewGame(id, enterCoin int) *Game {
 	return &Game{
-		c: make(chan string, 10),
+		id: id,
 		enterCoin: enterCoin,
+		playerMsgRcvr: make(chan string, 10),
 		players: make([]*player, 0, maxPlayer),
 		timer: time.NewTimer(0),
 	}
@@ -42,15 +53,19 @@ func (g *Game)Go() {
 		select {
 		case <-g.timer.C:
 			g.onTimer()
-		case msg := <-g.c:
+		case msg := <-g.playerMsgRcvr:
 			log.Debugf("game chan recv=%+v", msg)
 		}
 	}
 }
 
-func (g *Game)PlayerEnter(id string) {
-	coin := g.MGetCoin()
-	g.players = append(g.players, NewPlayer(id, coin))
+func (g *Game)PlayerEnter(id string, rcvr chan string, sendFunc func(msg string)) {
+	g.playersMu.Lock()
+	g.players = append(g.players, NewPlayer(id, sendFunc))
+	g.playersMu.Unlock()
+
+	// fixme:
+	g.playerMsgRcvr <- rcvr
 }
 
 func (g *Game)onTimer() {
@@ -89,11 +104,11 @@ func (g *Game)checkCoinEnough() {
 	}
 	playerCoinMap := g.MGetCoin(ids)
 
-//	for id, coin := range (playerCoinMap) {
+	//	for id, coin := range (playerCoinMap) {
 	for _, coin := range (playerCoinMap) {
 		if coin < g.enterCoin {
 			// 没有足够的钱玩
-//			g.c <- msgcInst.hasNoEnoughMoney(id)
+			//			g.c <- msgcInst.hasNoEnoughMoney(id)
 			// todo: connId
 			g.c <- msgcInst.hasNoEnoughMoney(0)
 		}
