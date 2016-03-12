@@ -5,15 +5,20 @@ import (
 	"net/rpc"
 	"chess/dao"
 	"fmt"
+	"chess/com"
+	"encoding/json"
 )
 
 type gameState int
 const (
-	gsWait gameState = iota    // 发牌
-	gsDeal
+	gsWaitPlayer gameState = iota    // 发牌
+	gsWaitReady
+	gsDealAndPlay
 	gsSettle    // 结算
 	gsExit    // 全部人退出,销毁
 )
+
+const cmd_PlayerEnter = 500000
 
 type PlayerMsg struct {
 	Id  string
@@ -29,7 +34,7 @@ type Game struct {
 	state     gameState
 
 	players   []*player
-	playersMu sync.Mutex
+	playersMu sync.RWMutex
 
 	timer     *time.Timer
 }
@@ -39,6 +44,7 @@ func NewGame(dao *rpc.Client, id, enterCoin int) *Game {
 		dao: dao,
 		id: id,
 		enterCoin: enterCoin,
+		state: gsWaitPlayer,
 		players: make([]*player, 0, maxPlayer),
 		timer: time.NewTimer(0),
 	}
@@ -51,12 +57,14 @@ func (g *Game)Go() {
 			g.onTimer()
 		}
 
+		g.playersMu.RLock()
 		for i, player := range g.players {
 			select {
 			case msg := <-player.rcvr:
-				g.handlePlayerMsg(i, msg)
+				g.handlePlayer(i, msg)
 			}
 		}
+		g.playersMu.RUnlock()
 
 		if g.state == gsExit {
 			return
@@ -67,22 +75,27 @@ func (g *Game)Go() {
 func (g *Game)PlayerEnter(id string, rcvr chan string, sendFunc func(msg string)) {
 	player := NewPlayer(id, rcvr, sendFunc)
 
+	// get info from db
+	var reply dao.User_InfoReply
+	g.dao.Call("User.GetInfo", &dao.Args{Id: id}, &reply)
+
+	player.info = reply.Info
+
+	// add to game
 	g.playersMu.Lock()
 	g.players = append(g.players, player)
 	g.playersMu.Unlock()
 
-	// get info from db
-	var reply dao.Reply
-	g.dao.Call("User.GetCoin", &dao.Args{Id: id}, &reply)
-
-	player.coin = reply.Int
+	// notify game "i come"
+	rcvr <-com.MakeMsgString(cmd_PlayerEnter, 0, nil)
 }
 
 func (g *Game)onTimer() {
 	switch g.state {
-	case gsWait:
+	case gsWaitPlayer:
 		g.Deal()
-	case gsDeal:
+	case gsWaitReady:
+	case gsDealAndPlay:
 		g.settle()
 	case gsSettle:
 		g.NewRound()
@@ -121,6 +134,20 @@ func (g *Game)settle() {
 	g.timer.Reset(timeout_newrount)
 }
 
-func (g *Game)handlePlayerMsg(idx int, msg string) {
+func (g *Game)handlePlayer(idx int, msgstr string) {
+	var msg com.Msg
+	if err := json.Unmarshal([]byte(msgstr), &msg); err != nil {
+		return
+	}
 
+	switch msg.Cmd {
+	case cmd_PlayerEnter:
+		handlePlayerEnter(idx)
+	}
+
+}
+
+func (g *Game)handlePlayerEnter(idx int){
+	// notify
+	msg := msgCreatorInst.PlayerEnter(i)
 }

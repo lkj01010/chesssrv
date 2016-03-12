@@ -152,22 +152,18 @@ func (u *User)Auth(args *User_AuthArgs, reply *User_AuthReply) (err error) {
 	return
 }
 ///////////////////////////////////////////////////////
-type User_Info struct {
-	Id       string    `json:"id"`
-	Nickname string `json:"nickname"`
-	Coin     int    `json:"coin"`
-}
+
 
 type User_InfoReply struct {
 	Code int
-	Info User_Info
+	Info com.UserInfo
 }
 
-func (u *User)Info(args *Args, reply *User_InfoReply) (err error) {
+func (u *User)GetInfo(args *Args, reply *User_InfoReply) (err error) {
 	var nickname string
 
 	coin, _ := redis.Int(u.c.Do("HGET", k_user_ + args.Id, k_coin))
-	nickname, _= redis.String(u.c.Do("HGET", k_user_ + args.Id, k_nickname))
+	nickname, _ = redis.String(u.c.Do("HGET", k_user_ + args.Id, k_nickname))
 	log.Infof("coin=%+v", coin)
 	// fixme:这里用是否为空判断用户存在与否
 	if nickname == "" {

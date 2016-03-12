@@ -130,7 +130,7 @@ func (m *model)handleInfo(content string) (resp string, err error) {
 	args := &dao.Args{Id: m.id}
 	log.Debugf("handleInfo args=%+v", args)
 	var reply dao.User_InfoReply
-	if err = m.dao.Call("User.Info", args, &reply); err != nil {
+	if err = m.dao.Call("User.GetInfo", args, &reply); err != nil {
 		return
 	}
 	log.Debugf("handleInfo, reply=%+v", reply)

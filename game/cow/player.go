@@ -1,4 +1,5 @@
 package cow
+import "chess/com"
 
 type playerState int
 const (
@@ -15,7 +16,7 @@ type player struct {
 	sendFunc func(msg string)
 
 	//player info
-	coin     int
+	info 	com.UserInfo
 }
 
 func NewPlayer(id string, rcvr chan string, sendFunc func(msg string)) *player {
