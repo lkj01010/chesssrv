@@ -19,9 +19,10 @@ type player struct {
 	info 	com.UserInfo
 }
 
-func NewPlayer(id string, rcvr chan string, sendFunc func(msg string)) *player {
+func NewPlayer(id string, info com.UserInfo, rcvr chan string, sendFunc func(msg string)) *player {
 	return &player{
 		id: id,
+		info: info,
 		state: psWait,
 		cards : make([]card, 5),
 		rcvr: rcvr,

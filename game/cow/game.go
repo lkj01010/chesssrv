@@ -1,9 +1,7 @@
 package cow
 import (
 	"time"
-	"sync"
 	"net/rpc"
-	"chess/dao"
 	"fmt"
 	"chess/com"
 	"encoding/json"
@@ -18,7 +16,13 @@ const (
 	gsExit    // 全部人退出,销毁
 )
 
-const cmd_PlayerEnter = 500000
+type PlayerEnterOrLeave struct {
+	isEnter  bool
+	id       string
+	info     com.UserInfo
+	rcvr     chan string
+	sendFunc func(msg string)
+}
 
 type PlayerMsg struct {
 	Id  string
@@ -34,7 +38,8 @@ type Game struct {
 	state     gameState
 
 	players   []*player
-	playersMu sync.RWMutex
+	playerCh  chan PlayerEnterOrLeave
+	//			  playersMu sync.RWMutex
 
 	timer     *time.Timer
 }
@@ -46,6 +51,7 @@ func NewGame(dao *rpc.Client, id, enterCoin int) *Game {
 		enterCoin: enterCoin,
 		state: gsWaitPlayer,
 		players: make([]*player, 0, maxPlayer),
+		playerCh: make(chan PlayerEnterOrLeave, 10),
 		timer: time.NewTimer(0),
 	}
 }
@@ -53,18 +59,19 @@ func NewGame(dao *rpc.Client, id, enterCoin int) *Game {
 func (g *Game)Go() {
 	for {
 		select {
+		case el := <-g.playerCh:
+			g.handlePlayerEnterOrLeave(el)
+
 		case <-g.timer.C:
 			g.onTimer()
 		}
 
-		g.playersMu.RLock()
 		for i, player := range g.players {
 			select {
 			case msg := <-player.rcvr:
-				g.handlePlayer(i, msg)
+				g.handlePlayerReceive(i, msg)
 			}
 		}
-		g.playersMu.RUnlock()
 
 		if g.state == gsExit {
 			return
@@ -72,22 +79,26 @@ func (g *Game)Go() {
 	}
 }
 
-func (g *Game)PlayerEnter(id string, rcvr chan string, sendFunc func(msg string)) {
-	player := NewPlayer(id, rcvr, sendFunc)
+func (g *Game)handlePlayerEnterOrLeave(el PlayerEnterOrLeave) {
+	if el.isEnter {
+		player := NewPlayer(el.id, el.info, el.rcvr, el.sendFunc)
+		g.players = append(g.players, player)
 
-	// get info from db
-	var reply dao.User_InfoReply
-	g.dao.Call("User.GetInfo", &dao.Args{Id: id}, &reply)
+		// notify game "i come"
+		el.rcvr <- com.MakeMsgString(Cmd_Inner_PlayerEnter, 0, nil)
 
-	player.info = reply.Info
+	} else {
+		// todo:
+	}
+}
 
-	// add to game
-	g.playersMu.Lock()
-	g.players = append(g.players, player)
-	g.playersMu.Unlock()
-
-	// notify game "i come"
-	rcvr <-com.MakeMsgString(cmd_PlayerEnter, 0, nil)
+func (g *Game)PlayerEnter(id string, info com.UserInfo, rcvr chan string, sendFunc func(msg string)) {
+	g.playerCh <- PlayerEnterOrLeave{
+		id: id,
+		info: info,
+		rcvr: rcvr,
+		sendFunc: sendFunc,
+	}
 }
 
 func (g *Game)onTimer() {
@@ -103,7 +114,7 @@ func (g *Game)onTimer() {
 }
 
 func (g *Game)NewRound() {
-	g.state = gsWait
+	g.state = gsWaitReady
 	// 检查每个玩家钱是否足够
 	g.checkCoinEnough()
 	// 等待玩家准备就绪
@@ -111,7 +122,7 @@ func (g *Game)NewRound() {
 }
 
 func (g* Game)Deal() {
-	g.state = gsDeal
+	g.state = gsDealAndPlay
 	for _, player := range (g.players) {
 		DealCards(player.cards)
 	}
@@ -120,7 +131,7 @@ func (g* Game)Deal() {
 
 func (g *Game)checkCoinEnough() {
 	for _, player := range (g.players) {
-		if player.state == psPlay && player.coin < g.enterCoin {
+		if player.state == psPlay && player.info.Coin < g.enterCoin {
 			player.sendFunc(msgCreatorInst.hasNoEnoughMoney())
 		}
 	}
@@ -134,20 +145,37 @@ func (g *Game)settle() {
 	g.timer.Reset(timeout_newrount)
 }
 
-func (g *Game)handlePlayer(idx int, msgstr string) {
+func (g *Game)handlePlayerReceive(idx int, msgstr string) {
 	var msg com.Msg
 	if err := json.Unmarshal([]byte(msgstr), &msg); err != nil {
 		return
 	}
 
 	switch msg.Cmd {
-	case cmd_PlayerEnter:
-		handlePlayerEnter(idx)
+	case Cmd_Inner_PlayerEnter:
+		g.handlePlayerEnter(idx)
 	}
 
 }
 
-func (g *Game)handlePlayerEnter(idx int){
+func (g *Game)handlePlayerEnter(idx int) {
 	// notify
-	msg := msgCreatorInst.PlayerEnter(i)
+	msg := msgCreatorInst.PlayerEnter(idx, &g.players[idx].info)
+	for _, player := range g.players {
+		player.sendFunc(msg)
+	}
+
+	if g.state == gsWaitPlayer {
+		// check game state
+		if len(g.players) >= 2 {
+			g.state = gsWaitReady
+
+			for _, player := range g.players {
+				msg := msgCreatorInst.WaitReady()
+				player.sendFunc(msg)
+			}
+		}
+	}
+
+
 }

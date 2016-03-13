@@ -90,7 +90,7 @@ func (m *Model)Handle(req string) (resp string, err error) {
 
 	} else {
 		pa = NewPlayerAgent(connId, m.playerAgentSend)
-		pa.Go()
+		go pa.Go()
 		m.playerAgents[connId] = pa
 	}
 
@@ -109,7 +109,7 @@ func (m *Model)GetFreeGameByType(typ RoomType) (game *cow.Game) {
 		// create game
 		m.gameIdAcc++
 		game = cow.NewGame(m.dao, m.gameIdAcc, RoomEnterCoin[typ])
-		game.Go()
+		go game.Go()
 
 		games = append(games, game)
 		m.games[m.gameIdAcc] = game

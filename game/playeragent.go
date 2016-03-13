@@ -13,6 +13,8 @@ type playerAgent struct {
 	sendFunc func(int, string)
 
 	toGame chan string		// 发往game的channel
+
+	info com.UserInfo
 }
 
 func NewPlayerAgent(connId int, sf func(string)) *playerAgent {
@@ -25,6 +27,11 @@ func NewPlayerAgent(connId int, sf func(string)) *playerAgent {
 }
 
 func (p *playerAgent)Go() {
+	// get user info
+	var reply dao.User_InfoReply
+	modelInst.dao.Call("User.GetInfo", &dao.Args{Id: p.id}, &reply)
+	p.info = reply.Info
+
 	for {
 		select {
 		case rcv := <-p.c:
@@ -71,23 +78,13 @@ func (p *playerAgent)handleEnterReq(content string) (err error) {
 		p.id = content.Id
 
 		//判断钱是否够
-		var isCoinEnough bool
-		var reply dao.Reply
-		if err = modelInst.dao.Call("User.GetCoin", dao.Args{p.id}, &reply); err != nil {
-			return
-		}
-		if reply.Code == com.E_Success {
-			isCoinEnough = (reply.Int >= RoomEnterCoin[content.RoomType])
-		}else {
-			err =  com.ErrRedisValueNotFound
-			return
-		}
+		isCoinEnough := (p.info.Coin >= RoomEnterCoin[content.RoomType])
 
 		// 够入场费
 		if isCoinEnough {
 			// 塞进房间
 			game := modelInst.GetFreeGameByType(content.RoomType)
-			game.PlayerEnter(content.Id, p.toGame, p.Send)
+			game.PlayerEnter(content.Id, p.info, p.toGame, p.Send)
 		}else {
 			// 不够入场费
 			// 返回response
