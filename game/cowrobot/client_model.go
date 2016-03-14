@@ -1,14 +1,8 @@
 package cowrobot
 import (
-//	"github.com/lkj01010/log"
-//	"golang.org/x/net/websocket"
-//	"time"
-//	"chess/cfg"
-//	"net"
 	"github.com/lkj01010/log"
 	"chess/com"
 	"encoding/json"
-	"chess/agent"
 )
 
 
@@ -23,13 +17,13 @@ func (c *Clientmodel)Handle(req string) (err error) {
 	}
 
 	switch msg.Cmd {
-	case agent.CmdRegisterResp:
+	case com.Cmd_Ag_RegisterResp:
 		err = c.handleRegister(msg.Content)
-	case agent.CmdAuthResp:
+	case com.Cmd_Ag_AuthResp:
 		err = c.handleAuth(msg.Content)
-	case agent.CmdLoginResp:
+	case com.Cmd_Ag_LoginResp:
 		err = c.handleLogin(msg.Content)
-	case agent.CmdInfoResp:
+	case com.Cmd_Ag_InfoResp:
 		err = c.handleInfo(msg.Content)
 	}
 	if err != nil {

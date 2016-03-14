@@ -32,4 +32,5 @@ var (
 
 	// game
 	ErrAlreadyInGame = errors.New("player already in game")
+	ErrRoomTypeInvalid = errors.New("room type invalid")
 )

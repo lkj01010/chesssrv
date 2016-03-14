@@ -85,7 +85,7 @@ func (g *Game)handlePlayerEnterOrLeave(el PlayerEnterOrLeave) {
 		g.players = append(g.players, player)
 
 		// notify game "i come"
-		el.rcvr <- com.MakeMsgString(Cmd_Inner_PlayerEnter, 0, nil)
+		el.rcvr <- com.MakeMsgString(com.Cmd_Game_EnterReq, 0, nil)
 
 	} else {
 		// todo:
@@ -151,8 +151,8 @@ func (g *Game)handlePlayerReceive(idx int, msgstr string) {
 		return
 	}
 
-	switch msg.Cmd {
-	case Cmd_Inner_PlayerEnter:
+	switch com.Command(msg.Cmd) {
+	case com.Cmd_Game_EnterReq:
 		g.handlePlayerEnter(idx)
 	}
 

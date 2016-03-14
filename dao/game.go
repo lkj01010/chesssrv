@@ -6,7 +6,6 @@ import (
 	"chess/cfg"
 	"strconv"
 	log "github.com/lkj01010/log"
-"chess/com"
 )
 
 const (

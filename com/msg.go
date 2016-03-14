@@ -8,9 +8,9 @@ type Msg struct {
 	Content string `json:"content"`
 }
 
-func MakeMsgString(cmd int, param int, content interface{}) string {
+func MakeMsgString(cmd Command, param int, content interface{}) string {
 	var msg Msg
-	msg.Cmd = cmd
+	msg.Cmd = int(cmd)
 	msg.Param = param
 
 	if content != nil {
@@ -30,10 +30,10 @@ type IdMsg struct {
 	Content string `json:"content"`
 }
 
-func MakeIdMsgString(id string, cmd int, param int, content interface{}) string {
+func MakeIdMsgString(id string, cmd Command, param int, content interface{}) string {
 	var msg IdMsg
 	msg.Id = id
-	msg.Cmd = cmd
+	msg.Cmd = int(cmd)
 	msg.Param = param
 	if content != nil {
 		c, _ := json.Marshal(content)

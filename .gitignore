@@ -1,0 +1,3 @@
+*.exe
+/com/command.txt
+/com/Command_string.go

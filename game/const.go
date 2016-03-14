@@ -9,7 +9,7 @@ const (
 )
 
 func (rt RoomType)IsValid() bool {
-	return 0 <= rt < RoomTypeCount
+	return RoomType_0 <= rt && rt < RoomTypeCount
 }
 
 var RoomEnterCoin = [RoomTypeCount]int{200, 300, 400}

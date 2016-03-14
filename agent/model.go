@@ -44,27 +44,27 @@ func (m *model)Handle(req string) (resp string, err error) {
 	}
 
 	if m.isLogin == false &&
-	(msg.Cmd != CmdHeartbeat &&
-	msg.Cmd != CmdRegisterReq &&
-	msg.Cmd != CmdAuthReq &&
-	msg.Cmd != CmdLoginReq) {
+	(msg.Cmd != com.Cmd_Com_Heartbeat &&
+	msg.Cmd != com.Cmd_Ag_RegisterReq &&
+	msg.Cmd != com.Cmd_Ag_AuthReq &&
+	msg.Cmd != com.Cmd_Ag_LoginReq) {
 		err = com.ErrCommandWithoutLogin
 		return
 	}
 
 	switch msg.Cmd {
-	case CmdHeartbeat:
+	case com.Cmd_Com_Heartbeat:
 		m.handleHeartbeat()
-	case CmdRegisterReq:
+	case com.Cmd_Ag_RegisterReq:
 		resp, err = m.handleRegister(msg.Content)
-	case CmdAuthReq:
+	case com.Cmd_Ag_AuthReq:
 		resp, err = m.handleAuth(msg.Content)
-	case CmdLoginReq:
+	case com.Cmd_Ag_LoginReq:
 		resp, err = m.handleLogin(msg.Content)
-	case CmdInfoReq:
+	case com.Cmd_Ag_InfoReq:
 		resp, err = m.handleInfo(msg.Content)
 
-	case Cmd_Ag_ToGameReq:
+	case com.Cmd_Ag_ToGameReq:
 		resp, err = m.handleToGame(msg.Content)
 	}
 
@@ -89,7 +89,7 @@ func (m *model)handleRegister(content string) (resp string, err error) {
 		return
 	}
 	log.Infof("User.Register %+v -> %+v", args, reply)
-	resp = com.MakeMsgString(CmdRegisterResp, reply.Code, nil)
+	resp = com.MakeMsgString(com.Cmd_Ag_RegisterResp, reply.Code, nil)
 	return
 }
 
@@ -103,7 +103,7 @@ func (m *model)handleAuth(content string) (resp string, err error) {
 	if err = m.dao.Call("User.Auth", args, &reply); err != nil {
 		return
 	}
-	resp = com.MakeMsgString(CmdAuthResp, reply.Code, nil)
+	resp = com.MakeMsgString(com.Cmd_Ag_AuthResp, reply.Code, nil)
 	return
 }
 
@@ -122,7 +122,7 @@ func (m *model)handleLogin(content string) (resp string, err error) {
 		m.id = reply.Id
 		m.isLogin = true
 	}
-	resp = com.MakeMsgString(CmdLoginResp, reply.Code, nil)
+	resp = com.MakeMsgString(com.Cmd_Ag_LoginResp, reply.Code, nil)
 	return
 }
 
@@ -134,7 +134,7 @@ func (m *model)handleInfo(content string) (resp string, err error) {
 		return
 	}
 	log.Debugf("handleInfo, reply=%+v", reply)
-	resp = com.MakeMsgString(CmdInfoResp, reply.Code, reply.Info)
+	resp = com.MakeMsgString(com.Cmd_Ag_InfoResp, reply.Code, reply.Info)
 	return
 }
 

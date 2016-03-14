@@ -156,7 +156,7 @@ func TestServer2(t *testing.T) {
 
 	log.Info("test:cmdLoginReq1")
 //	msg = []byte(`{"cmd":104,"content":"{\"account\":\"testUtf\",\"psw\":\"pswlk22\"}"}`)
-	msg = com.MakeMsgString(CmdLoginReq, 0, &LoginReq{"testUtf", "pswlk22"})
+	msg = com.MakeMsgString(com.Cmd_Ag_LoginReq, 0, &LoginReq{"testUtf", "pswlk22"})
 	sendMsg(conn, msg)
 	time.Sleep(1 * time.Second)
 
@@ -168,12 +168,12 @@ func TestServer2(t *testing.T) {
 	log.Info("test:handleInfo")
 //	msg = []byte(`{"cmd":106}`)
 //	msg = []byte(`{"cmd":106,"content":"{\"account\":\"testUtf\",\"psw\":\"p\"}"}`)
-	msg = com.MakeMsgString(CmdInfoReq, 0, nil)
+	msg = com.MakeMsgString(com.Cmd_Ag_InfoReq, 0, nil)
 	sendMsg(conn, msg)
 	time.Sleep(11 * time.Second)
 
 	log.Info("test:enter game room")
-	msg = com.MakeMsgString(Cmd_Ag_ToGameReq, 0, nil)
+	msg = com.MakeMsgString(com.Cmd_Ag_ToGameReq, 0, nil)
 
 }
 

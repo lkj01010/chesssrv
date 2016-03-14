@@ -24,10 +24,10 @@ type Model struct {
 	gameIdAcc    int                   // 房间id counter
 
 	games        map[int]*cow.Game     // 房间
-	freeGames    [RoomType][]*cow.Game // 每个type一个数组
+	freeGames    [][]*cow.Game // 每个type一个数组
 	gamesMu      sync.RWMutex
 
-	playerGames  map[string]*cow.Game  // 玩家（id） 对应其进入的game
+	playerGames  map[int]*cow.Game  // 玩家（id） 对应其进入的game
 }
 
 func NewModel() *Model {
@@ -49,10 +49,13 @@ func NewModel() *Model {
 	// data init
 	modelInst.gameIdAcc = 0
 	modelInst.games = map[int]*cow.Game{}
-	modelInst.playerGames = map[string]*cow.Game{}
+	modelInst.playerGames = map[int]*cow.Game{}
 	modelInst.freeGames = [][]*cow.Game{}
 	// 1000 games each type
-	for i, _ := range (modelInst.freeGames) {
+//	for i, _ := range (modelInst.freeGames) {
+//		modelInst.freeGames[i] = make([]*cow.Game, 0, 1000)
+//	}
+	for i := 0; i < int(RoomTypeCount); i ++ {
 		modelInst.freeGames[i] = make([]*cow.Game, 0, 1000)
 	}
 
@@ -84,9 +87,8 @@ func (m *Model)Handle(req string) (resp string, err error) {
 	connId := outmsg.ConnId
 
 	// find agent
-	var pa *playerAgent
-	pa, err = m.playerAgents[connId]
-	if err == nil {
+	pa, ok := m.playerAgents[connId]
+	if ok {
 
 	} else {
 		pa = NewPlayerAgent(connId, m.playerAgentSend)
@@ -98,7 +100,7 @@ func (m *Model)Handle(req string) (resp string, err error) {
 	return
 }
 
-func (m *Model)GetFreeGameByType(typ RoomType) (game *cow.Game) {
+func (m *Model)GetFreeGameByType(typ RoomType) *cow.Game {
 	games := modelInst.freeGames[typ]
 
 	m.gamesMu.Lock()
@@ -118,7 +120,7 @@ func (m *Model)GetFreeGameByType(typ RoomType) (game *cow.Game) {
 		// put to first game
 		game = games[0]
 	}
-	return
+	return game
 }
 
 func (m *Model)RemovePlayerAgent(connId string) {

@@ -2,37 +2,37 @@ package agent
 import (
 )
 
-const (
-	CmdHeartbeat = 10
-	CmdRegisterReq = 100
-	CmdRegisterResp = 101
+//const (
+//	CmdHeartbeat = 10
+//	CmdRegisterReq = 100
+//	CmdRegisterResp = 101
+//
+//	CmdAuthReq = 102
+//	CmdAuthResp = 103
+//	CmdLoginReq = 104
+//	CmdLoginResp = 105
+//	CmdInfoReq = 106
+//	CmdInfoResp = 107
+//
+//	CmdToLobbyReq = 200
+//	CmdToLobbyResp = 201
+//
+//	Cmd_Ag_ToGameReq = 202
+//)
 
-	CmdAuthReq = 102
-	CmdAuthResp = 103
-	CmdLoginReq = 104
-	CmdLoginResp = 105
-	CmdInfoReq = 106
-	CmdInfoResp = 107
-
-	CmdToLobbyReq = 200
-	CmdToLobbyResp = 201
-
-	Cmd_Ag_ToGameReq = 202
-)
-
-var cmdText = &map[int]string{
-	CmdHeartbeat:	"heartbeat",
-	CmdRegisterReq:    "registerReq",
-	CmdRegisterResp:    "registerResp",
-	CmdAuthReq:    "authReq",
-	CmdAuthResp:    "authResp",
-	CmdLoginReq:    "loginReq",
-	CmdLoginResp:    "loginResp",
-
-	CmdToLobbyReq:    "toLobbyReq",
-	CmdToLobbyResp:    "toLobbyResp",
-	Cmd_Ag_ToGameReq:    "toGameReq",
-}
+//var cmdText = &map[int]string{
+//	CmdHeartbeat:	"heartbeat",
+//	CmdRegisterReq:    "registerReq",
+//	CmdRegisterResp:    "registerResp",
+//	CmdAuthReq:    "authReq",
+//	CmdAuthResp:    "authResp",
+//	CmdLoginReq:    "loginReq",
+//	CmdLoginResp:    "loginResp",
+//
+//	CmdToLobbyReq:    "toLobbyReq",
+//	CmdToLobbyResp:    "toLobbyResp",
+//	Cmd_Ag_ToGameReq:    "toGameReq",
+//}
 
 //var loginMethodCodes map[string]int
 //

@@ -7,7 +7,7 @@ type Args struct {
 }
 
 type Reply struct {
-	Code   string `json:"code"`
+	Code   int `json:"code"`
 	Int    int `json:"int"`
 	String string `json:"string"`
 }
