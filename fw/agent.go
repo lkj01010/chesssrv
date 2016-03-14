@@ -69,7 +69,7 @@ func (a *Agent)Serve() (err error) {
 			resp, err = a.Handle(msg)
 			if err != nil {
 				log.Error("agent session: ", err.Error())
-				return
+				break L
 			}
 			a.Write(resp)
 
@@ -77,7 +77,7 @@ func (a *Agent)Serve() (err error) {
 			if err = a.Write(msg); err != nil {
 				// 写错误
 				log.Error("client write failed: ", err.Error())
-				return
+				break L
 			}
 
 		case <-timeout.C:
@@ -86,19 +86,6 @@ func (a *Agent)Serve() (err error) {
 
 		}
 	}
-
-	//	var buf, resp string
-	//	err = a.Read(&buf):
-	//	if err != nil {
-	//		log.Error("read error:", err.Error())
-	//		return
-	//	}
-	//	resp, err = a.Handle(buf)
-	//	if err != nil {
-	//		log.Error("agent serve:", err.Error())
-	//		return
-	//	}
-	//	a.Write(resp)
 
 	return
 }

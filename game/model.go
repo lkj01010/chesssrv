@@ -16,23 +16,23 @@ var modelInst *Model
 type Model struct {
 	dao          *rpc.Client
 
-	agent        *fw.Agent             // 持有的外部agent (用来发消息)
+	agent        *fw.Agent            // 持有的外部agent (用来发消息)
 
-	playerAgents map[int]*playerAgent  // 消息分发到用户的agent
+	playerAgents map[int]*playerAgent // 消息分发到用户的agent
 	mu           sync.Mutex
 
-	gameIdAcc    int                   // 房间id counter
+	gameIdAcc    int                  // 房间id counter
 
-	games        map[int]*cow.Game     // 房间
-	freeGames    [][]*cow.Game // 每个type一个数组
+	games        map[int]*cow.Game    // 房间
+	freeGames    [][]*cow.Game        // 每个type一个数组
 	gamesMu      sync.RWMutex
 
-	playerGames  map[int]*cow.Game  // 玩家（id） 对应其进入的game
+	playerGames  map[int]*cow.Game    // 玩家（id） 对应其进入的game
 }
 
 func NewModel() *Model {
 	if modelInst != nil {
-		panic("game:Model:NewModel can invoke only once")
+		panic("game:Model:NewModel can be invoked only once")
 	}
 	modelInst := new(Model)
 
@@ -52,9 +52,9 @@ func NewModel() *Model {
 	modelInst.playerGames = map[int]*cow.Game{}
 	modelInst.freeGames = [][]*cow.Game{}
 	// 1000 games each type
-//	for i, _ := range (modelInst.freeGames) {
-//		modelInst.freeGames[i] = make([]*cow.Game, 0, 1000)
-//	}
+	//	for i, _ := range (modelInst.freeGames) {
+	//		modelInst.freeGames[i] = make([]*cow.Game, 0, 1000)
+	//	}
 	for i := 0; i < int(RoomTypeCount); i ++ {
 		modelInst.freeGames[i] = make([]*cow.Game, 0, 1000)
 	}

@@ -4,7 +4,9 @@ type Command int
 
 // com
 const (
-	Cmd_Com_Heartbeat Command = iota + 500
+	Cmd_Com_Start Command = iota +500
+	Cmd_Com_Heartbeat
+	Cmd_Com_End
 )
 
 // agent
