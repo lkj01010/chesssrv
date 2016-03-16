@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+package com;
+
+message UserInfo {
+    required string id = 1; // ID
+    required string nickname = 2; // str
+    optional int32 coin = 3; //optional field
+}
