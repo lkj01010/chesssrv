@@ -87,7 +87,7 @@ func testReadWriteServer(ws *websocket.Conn) {
 			fmt.Println(err)
 			break
 		}
-		fmt.Printf("send:%+v\n", buf[:n])
+//		fmt.Printf("send:%+v\n", buf[:n])
 
 		///////////
 		byteBuf := makeProtoString()
@@ -97,15 +97,44 @@ func testReadWriteServer(ws *websocket.Conn) {
 			fmt.Printf("failed: %s\n", err)
 			return
 		}
-		n, err = ws.Write([]byte("1234567"))
+		n, err = ws.Write(byteBuf)
 		fmt.Printf("send:%+v len=%+v", byteBuf, n)
 	}
 	fmt.Println("readWriteServer finished")
 }
 
+func testSendRecvBinaryServer(ws *websocket.Conn) {
+	fmt.Printf("sendRecvBinaryServer %#v\n", ws)
+	for {
+		var buf []byte
+		// Receive receives a binary message from client, since buf is []byte.
+		err := websocket.Message.Receive(ws, &buf)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		byteBuf := makeProtoString()
+		msg := &com.UserInfo{}
+		err = proto.Unmarshal(byteBuf, msg) //unSerialize
+		if err != nil {
+			fmt.Printf("failed: %s\n", err)
+			return
+		}
+
+		// Send sends a binary message to client, since buf is []byte.
+		err = websocket.Message.Send(ws, byteBuf)
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+		fmt.Printf("send:%#v\n", byteBuf)
+	}
+	fmt.Println("sendRecvBinaryServer finished")
+}
+
 func main() {
 	port := "8080"
-	http.Handle("/", websocket.Handler(testReadWriteServer))
+	http.Handle("/", websocket.Handler(testSendRecvBinaryServer))
 	log.Info("server start on:", port)
 
 	http.ListenAndServe(":" + port, nil)

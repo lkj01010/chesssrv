@@ -1,3 +1,4 @@
 *.exe
 /com/cmd.txt
 /com/Command_string.go
+*.DS_Store
