@@ -33,30 +33,161 @@ type UserFlight struct {
 
 
 type AirportIntermediary struct {
-//	ToAirport   string `json:'toAirport,omitempty'`
-//	FromAirport string `json:'fromAirport,omitempty'`
-//	Geo         struct {
-//					Alt int `json:"alt"`
-//					Lat float64 `json:"lat"`
-//					Lon float64 `json:"lon"`
-//				} `json:"geo"`
+	//	ToAirport   string `json:'toAirport,omitempty'`
+	//	FromAirport string `json:'fromAirport,omitempty'`
+	//	Geo         struct {
+	//					Alt int `json:"alt"`
+	//					Lat float64 `json:"lat"`
+	//					Lon float64 `json:"lon"`
+	//				} `json:"geo"`
 	Airportname string `json:"airportname"`
-	City string `json:"city"`
-	Country string `json:"country"`
-	Type string `json:"type"`
-	Tz string `json:"tz"`
-	Faa interface{} `json:"faa"`
-	Icao string `json:"icao"`
-	Id string `json:"id"`
+	City        string `json:"city"`
+	Country     string `json:"country"`
+	Type        string `json:"type"`
+	Tz          string `json:"tz"`
+	Faa         interface{} `json:"faa"`
+	Icao        string `json:"icao"`
+	Id          string `json:"id"`
 }
 
 type TravelSample struct {
 	TS string `json:"travel-sample"`
 }
 
+func testSet() {
+	buckValue := `this is the value`
 
-var bucket *gocb.Bucket
-func main() {
+	// 同时写会出问题..
+
+	//	go func() {
+	//		cluster1, e := gocb.Connect("couchbase://127.0.0.1")
+	//		log.Debugf("connect e=%+v", e)
+	//		if e != nil {
+	//			fmt.Errorf("%+v", e.Error())
+	//		}
+	//		bucket1, e := cluster1.OpenBucket("travel-sample", "")
+	//
+	//
+	//		N := 50000
+	//		t1 := time.Now()
+	//
+	//		for i := 0; i < N; i++ {
+	//			if _, err := bucket1.Upsert(string("lkj01010@163.com"), buckValue, 0); err != nil {
+	//				fmt.Print("bucket get err=", err.Error())
+	//				return
+	//			}else {
+	//			}
+	//		}
+	//		t2 := time.Now()
+	//		d := t2.Sub(t1)
+	//
+	//		log.Infof("BenchmarkGo go, %+v times in %+v", N, d)
+	//
+	//	}()
+	//
+	//	go func() {
+	//		cluster1, e := gocb.Connect("couchbase://127.0.0.1")
+	//		log.Debugf("connect e=%+v", e)
+	//		if e != nil {
+	//			fmt.Errorf("%+v", e.Error())
+	//		}
+	//		bucket1, e := cluster1.OpenBucket("travel-sample", "")
+	//
+	//
+	//		N := 50000
+	//		t1 := time.Now()
+	//
+	//		for i := 0; i < N; i++ {
+	//			if _, err := bucket1.Upsert(string("lkj01010@163.com"), buckValue, 0); err != nil {
+	//				fmt.Print("bucket get err=", err.Error())
+	//				return
+	//			}else {
+	//			}
+	//		}
+	//		t2 := time.Now()
+	//		d := t2.Sub(t1)
+	//
+	//		log.Infof("BenchmarkGo go, %+v times in %+v", N, d)
+	//
+	//	}()
+	//
+	//	go func() {
+	//		cluster1, e := gocb.Connect("couchbase://127.0.0.1")
+	//		log.Debugf("connect e=%+v", e)
+	//		if e != nil {
+	//			fmt.Errorf("%+v", e.Error())
+	//		}
+	//		bucket1, e := cluster1.OpenBucket("travel-sample", "")
+	//
+	//
+	//		N := 50000
+	//		t1 := time.Now()
+	//
+	//		for i := 0; i < N; i++ {
+	//			if _, err := bucket1.Upsert(string("lkj01010@163.com"), buckValue, 0); err != nil {
+	//				fmt.Print("bucket get err=", err.Error())
+	//				return
+	//			}else {
+	//			}
+	//		}
+	//		t2 := time.Now()
+	//		d := t2.Sub(t1)
+	//
+	//		log.Infof("BenchmarkGo go, %+v times in %+v", N, d)
+	//
+	//	}()
+	//
+	//	go func() {
+	//		cluster1, e := gocb.Connect("couchbase://127.0.0.1")
+	//		log.Debugf("connect e=%+v", e)
+	//		if e != nil {
+	//			fmt.Errorf("%+v", e.Error())
+	//		}
+	//		bucket1, e := cluster1.OpenBucket("travel-sample", "")
+	//
+	//
+	//		N := 50000
+	//		t1 := time.Now()
+	//
+	//		for i := 0; i < N; i++ {
+	//			if _, err := bucket1.Upsert(string("lkj01010@163.com"), buckValue, 0); err != nil {
+	//				fmt.Print("bucket get err=", err.Error())
+	//				return
+	//			}else {
+	//			}
+	//		}
+	//		t2 := time.Now()
+	//		d := t2.Sub(t1)
+	//
+	//		log.Infof("BenchmarkGo go, %+v times in %+v", N, d)
+	//
+	//	}()
+
+	cluster1, e := gocb.Connect("couchbase://127.0.0.1")
+	log.Debugf("connect e=%+v", e)
+	if e != nil {
+		fmt.Errorf("%+v", e.Error())
+	}
+	bucket1, e := cluster1.OpenBucket("travel-sample", "")
+
+
+	N := 1
+	t1 := time.Now()
+
+	for i := 0; i < N; i++ {
+		if _, err := bucket1.Upsert(string("lkj01010@163.com"), buckValue, 0); err != nil {
+			fmt.Print("bucket get err=", err.Error())
+			return
+		}else {
+		}
+	}
+	t2 := time.Now()
+	d := t2.Sub(t1)
+
+	log.Infof("BenchmarkGo go, %+v times in %+v", N, d)
+}
+
+func testGet() {
 	//	go func() {
 	//		cluster1, e := gocb.Connect("couchbase://127.0.0.1")
 	//		log.Debugf("connect e=%+v", e)
@@ -171,7 +302,7 @@ func main() {
 	//	}()
 
 	cluster, e := gocb.Connect("couchbase://127.0.0.1")
-//	cluster, e := gocb.Connect("couchbase://42.62.101.136")
+	//	cluster, e := gocb.Connect("couchbase://42.62.101.136")
 	log.Debugf("connect e=%+v", e)
 	if e != nil {
 		fmt.Errorf("%+v", e.Error())
@@ -180,8 +311,8 @@ func main() {
 	if e != nil {
 		fmt.Errorf("OpenBucket ERROR=%+v", e.Error())
 	}
-//
-//	myQuery := gocb.NewN1qlQuery("select * from `travel-sample`")
+	//
+	//	myQuery := gocb.NewN1qlQuery("select * from `travel-sample`")
 	myQuery := gocb.NewN1qlQuery("select * from `travel-sample` where airportname IS NOT NULL limit 1")
 	N := 100
 	t1 := time.Now()
@@ -189,27 +320,20 @@ func main() {
 	//	for i := 0; i < N; i++ {
 
 
-
 	rows, err := bucket.ExecuteN1qlQuery(myQuery, nil)
 	if err != nil {
 		fmt.Println("ERROR EXECUTING N1QL QUERY:", err)
 	}
 	var airports []AirportIntermediary
-	var row AirportIntermediary	// 这里的查询结果要严格对应定义的格式,否则转出来的struct的内部值都是空值
+	var row AirportIntermediary    // 这里的查询结果要严格对应定义的格式,否则转出来的struct的内部值都是空值
 	log.Infof("rows=%#v", rows)
 	for rows.Next(&row) {
 		airports = append(airports, row)
 		log.Debugf("row=%+v", row)
 	}
-//	_ = rows.Close()
-//	bytes, _ := json.Marshal(airports)
 	log.Infof("airport = %+v", airports)
 
 
-//	var row interface{}
-//	for rows.Next(&row) {
-//		log.Infof("Row: %#v\n", row)
-//	}
 	if err := rows.Close(); err != nil {
 		fmt.Printf("N1QL query error: %s\n", err)
 	}
@@ -222,13 +346,19 @@ func main() {
 	d := t2.Sub(t1)
 
 	log.Infof("BenchmarkGo, %+v times in %+v", N, d)
+}
 
+
+var bucket *gocb.Bucket
+func main() {
+
+	testSet()
 
 }
 
 /**
 结论: (本地127.0.0.1访问)
-1. get(JSON)单核7000op/s左右
+1. Get(JSON) 或者 Upsert 单核7000op/s左右
 2. 4~5核20000+op/s
 3. n1ql 单核 select *
 from `travel-sample`
