@@ -9,7 +9,7 @@ import (
 func main() {
 	// write
 	msg := &com.UserInfo{
-		Id:  proto.String("lkj老大"),
+		Id:  proto.String("lkj"),
 		Nickname: proto.String("mid"),
 	} //msg init
 
@@ -22,6 +22,7 @@ func main() {
 
 	defer f.Close()
 	buffer, err := proto.Marshal(msg) //SerializeToOstream
+	fmt.Println("marshl to=", buffer)
 	f.Write(buffer)
 
 	// read
