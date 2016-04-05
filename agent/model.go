@@ -144,7 +144,7 @@ func (m *model)handleToGame(content string) (resp string, err error) {
 	if b, err = json.Marshal(req); err != nil {
 		log.Error("handleToGame:error=", err)
 	}
-	msg := com.MakeConnIdRawMsgString(m.agent.ConnId, b)	// can? b is of []type, need string
+	msg := com.MakeConnIdRawMsgString(m.agent.ConnId, b)    // can? b is of []type, need string
 	serverInst.gameCli.Send(msg)
 	return
 }
