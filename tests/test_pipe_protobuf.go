@@ -110,24 +110,24 @@ func testSendRecvBinaryServer(ws *websocket.Conn) {
 		// Receive receives a binary message from client, since buf is []byte.
 		err := websocket.Message.Receive(ws, &buf)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("recive err:", err)
 		}
 
-		byteBuf := makeProtoString()
-		msg := &com.UserInfo{}
-		err = proto.Unmarshal(byteBuf, msg) //unSerialize
-		if err != nil {
-			fmt.Printf("failed: %s\n", err)
-			return
-		}
+//		byteBuf := makeProtoString()
+//		msg := &com.UserInfo{}
+//		err = proto.Unmarshal(byteBuf, msg) //unSerialize
+//		if err != nil {
+//			fmt.Printf("failed: %s\n", err)
+//			return
+//		}
 
 		// Send sends a binary message to client, since buf is []byte.
-		err = websocket.Message.Send(ws, byteBuf)
+		err = websocket.Message.Send(ws, buf)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("send err:", err)
 			break
 		}
-		fmt.Printf("send:%#v\n", byteBuf)
+		fmt.Printf("send:%#v\n", buf)
 	}
 	fmt.Println("sendRecvBinaryServer finished")
 }
